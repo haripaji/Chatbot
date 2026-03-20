@@ -164,15 +164,39 @@
         addMessage("Namaste! Main Veda Smart AI hoon. Main aapki creative writing aur development mein help kar sakta hoon. 🔮", "bot");
     }
 
-    // --- EXPERT LOGIC ---
-    function getReply(text) {
-        text = text.toLowerCase().trim();
-        if(text.includes("hi") || text.includes("hello") || text.includes("namaste")) return "Hello! Aaj hum kis expert topic par kaam karein?";
-        if(text.includes("code") || text.includes("html") || text.includes("js")) return "Coding mein logic hi sabkuch hai. Kya main aapka code review karoon?";
-        if(text.includes("story") || text.includes("aryan") || text.includes("fantasy")) return "Historical fantasy aur chakra-tech world-building mera favourite hai. Boliye!";
-        if(text.includes("joke") || text.includes("hasao")) return "Duniya mein 10 tarah ke log hote hain: Wo jo binary samajhte hain, aur wo jo nahi! 😂";
-        return "Dilchasp baat hai! Thoda detail mein batayenge?";
+    // --- EXPERT LOGIC ---// --- UNIVERSAL SMART FUNCTION (NO CHANGES NEEDED LATER) ---
+function getReply(text) {
+    // 1. Input Cleaning: User ke message ko lowercase karke extra space hatana
+    text = text.toLowerCase().trim();
+
+    // 2. MATH SOLVER: Agar input mein numbers aur math symbols (+, -, *, /) hain
+    const mathPattern = /^[0-9+\-*/().\s]+$/;
+    if (mathPattern.test(text) && /[0-9]/.test(text)) {
+        try {
+            // Eval calculation solve karega aur Result return karega
+            const result = eval(text);
+            return `Calculation ka jawab hai: ${result} 🔢`;
+        } catch (e) {
+            return "Math expression mein thodi galti hai, please check karein. 😅";
+        }
     }
+
+    // 3. DYNAMIC DATABASE SCANNER: responses.js ki har 'Key' ko check karna
+    // 'vedaDatabase' wahi object hai jo aapki responses.js mein hai
+    if (typeof vedaDatabase !== 'undefined') {
+        for (let key in vedaDatabase) {
+            // Agar user ke sentence mein hamara 'Keyword' kahin bhi hai...
+            if (text.includes(key.toLowerCase())) {
+                return vedaDatabase[key]; // ...toh turant uska jawab do
+            }
+        }
+    }
+
+    // 4. FALLBACK: Agar math nahi hai aur database mein bhi keyword nahi mila
+    // Ye 'defaultResponse' bhi responses.js se hi uthayega
+    return (typeof defaultResponse !== 'undefined') ? defaultResponse : "Hmm, main samajh nahi paya. Kya aap Math ya apne Projects ke baare mein baat kar rahe hain?";
+}
+
 
     function addMessage(text, type) {
         const msgDiv = document.createElement("div");
