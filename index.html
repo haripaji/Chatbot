@@ -194,7 +194,7 @@ function fallback(text) {
 
 // AI
 async function getAI(text) {
-  if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") return fallback(text);
+  if (!API_KEY || API_KEY === "gen-lang-client-0203533754") return fallback(text);
 
   try {
     let res = await fetch("https://api.openai.com/v1/chat/completions", {
