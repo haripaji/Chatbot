@@ -90,41 +90,45 @@ function clean(t){return t.toLowerCase().trim()}
 function rand(a){return a[Math.floor(Math.random()*a.length)]}
 function match(t,arr){return arr.some(w=>t.includes(w))}
 
-// ===== ADD MESSAGE (WITH SIMPLE ICONS) =====
+// Replace old addMessage() with this fixed version
 function addMessage(text,type){
- let d=document.createElement("div");
- d.className="msg "+type;
- d.innerText=text;
+    let d=document.createElement("div");
+    d.className="msg "+type;
+    d.innerText=text;
 
- if(type==="bot"){
-  let actions=document.createElement("div");
-  actions.style.marginTop="5px";
-  actions.style.fontSize="13px";
-  actions.style.display="flex";
-  actions.style.gap="8px";
+    if(type==="bot"){
+        let actions=document.createElement("div");
+        actions.style.marginTop="5px";
+        actions.style.fontSize="14px";
+        actions.style.display="flex";
+        actions.style.gap="10px";
 
-  let like=document.createElement("span");
-  like.innerText="👍";
-  like.onclick=()=>addMessage("Thanks 😊","bot");
+        let like=document.createElement("span");
+        like.innerText="👍";
+        like.style.cursor="pointer";
+        like.onclick=()=>addMessage("Thanks 😊","bot");
 
-  let dislike=document.createElement("span");
-  dislike.innerText="👎";
-  dislike.onclick=()=>addMessage("Sorry 😅 try again","bot");
+        let dislike=document.createElement("span");
+        dislike.innerText="👎";
+        dislike.style.cursor="pointer";
+        dislike.onclick=()=>addMessage("Sorry 😅 try again","bot");
 
-  let copy=document.createElement("span");
-  copy.innerText="📋";
-  copy.onclick=()=>navigator.clipboard.writeText(text);
+        let copy=document.createElement("span");
+        copy.innerText="📋";
+        copy.style.cursor="pointer";
+        copy.onclick=()=>navigator.clipboard.writeText(text);
 
-  let speakBtn=document.createElement("span");
-  speakBtn.innerText="🔊";
-  speakBtn.onclick=()=>speak(text);
+        let speakBtn=document.createElement("span");
+        speakBtn.innerText="🔊";
+        speakBtn.style.cursor="pointer";
+        speakBtn.onclick=()=>speak(text);
 
-  actions.append(like,dislike,copy,speakBtn);
-  d.appendChild(actions);
- }
+        actions.append(like,dislike,copy,speakBtn);
+        d.appendChild(actions);
+    }
 
- chat.appendChild(d);
- chollHeight;
+    chat.appendChild(d);
+    chat.scrollTop=chat.scrollHeight;
 }
 
 // ===== BRAIN =====
