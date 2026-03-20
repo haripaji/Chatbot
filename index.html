@@ -113,10 +113,10 @@ function getReply(text){
  text=clean(text);
 
  // NAME SET
- if(match(text,["my name is","mera naam","i am","main hoon"])){
+ if(match(text,["my name is","mera naam","Mera naam hai","Mera name","My name is","I'm","Mai hu","i am","main hoon"])){
   let n=text.split(" ").pop();
   userData.name=n;
-  localStorage.setItem("name",n);
+  localStorage.setItem("name"," Naam","Name",n);
   return "Nice to meet you "+n+" 😊";
  }
 
@@ -128,7 +128,7 @@ function getReply(text){
  }
 
  // GREETING
- if(match(text,["hello","hi","hey","helo","hii","namaste","yo"])){
+ if(match(text,["hello","hi"," Hello ","👋","hey","helo","hii","namaste","yo"])){
   return rand([
    "Hello 😊 kaise ho?",
    "Hi 👋 kya haal hai?",
@@ -147,8 +147,10 @@ function getReply(text){
  }
 
  // HELP
- if(match(text,["help","madad","assist"])){
-  return "Main help ke liye hoon 😊 batao kya chahiye";
+ if(match(text,["help","madad","meri help karo","assist"])){
+  return "Main help ke liye hoon 😊 batao kya chahiye",
+     " haan bolo 😀",
+     "Main poori koshish karunga 😊 batao kya help chahiye";
  }
 
  // HAPPY
@@ -158,17 +160,21 @@ function getReply(text){
 
  // SAD
  if(match(text,["sad","dukhi","tension","stress","problem"])){
-  return "Kya hua? 😔 batao main sun raha hoon";
+  return "Kya hua? 😔 batao main sun raha hoon",
+   " mujhe bata sakte hai 😊 ho sakta hai main help kar paaun";
  }
 
  // THANKS
- if(match(text,["thanks","thank you","thx"])){
-  return "You're welcome 😊";
+ if(match(text,["thanks","thank you","Thanks","thx"])){
+  return "You're welcome 😊",
+   " aapke liye hamesa taiyar 🥰";
  }
 
  // BYE
  if(match(text,["bye","goodbye"])){
-  return "Bye 👋 phir milte hain";
+  return "Bye 👋 phir milte hain",
+   " Apke sath maja aaya par mai aapko bhool sakta hun par aap mujhe yaad rakhna bye",
+   "mere sath time spend karne ke liye thankyou! bye 💗";
  }
 
  // JOKE
@@ -176,12 +182,32 @@ function getReply(text){
   return rand([
    "😂 coder kabhi sota nahi",
    "🤣 bug hi life ban gaya",
-   "😆 computer ko thand lag gayi"
+   "😆 computer ko thand lag gayi",
+   "Teacher ne pucha homework kahan hai, student bola dog kha gaya… teacher bola tumhare paas dog hi nahi hai, student bola isi liye toh shock mein hoon 😂",
+"Mummy boli phone chhod aur padhai kar, maine bola 5 minute… 5 minute baad mummy boli bas karo, maine bola disturb mat karo 😆",
+"Friend bola gym kab se ja raha hai, maine bola kal se… friend bola kal kab aayega 🤣",
+"Teacher bola 2+2 kitna hota hai, student bola 4… phir bola mood ho toh 5 bhi ho sakta hai 😜",
+"Papa bole bade ho kar kya banoge, beta bola charger… kyunki sab mujhe hi dhoondte rehte hain 😁",
+"Exam mein likha success kya hai, answer diya jab net fast ho aur buffering na ho 😎",
+"Friend bola late kyun aaya, maine bola Google Maps ne galat raasta dikha diya… par main toh ghar pe hi tha 😂",
+"Mummy boli itna hans kyun raha hai, maine bola meme dekha… mummy boli hume bhi dikha, maine bola aapko samajh nahi aayega 😄",
+"Teacher bola class mein sabse intelligent kaun hai, student bola main… kyunki main hi sabse kam bolta hoon 😆",
+"Doctor bola tumhe rest chahiye, maine bola phone ka kya karu… doctor bola usko bhi rest de do 😅",
+"Friend bola tu itna serious kyun hai, maine bola battery low hai 😂",
+"Mummy boli jaldi soya karo, maine bola dreams ka episode miss ho jayega 😴😆",
+"Teacher bola late kyun aaye, student bola sapna dekh raha tha ki time pe aaya hoon 😂",
+"Friend bola itna confidence kaise hai, maine bola galtiyon ka experience hai 😎",
+"Papa bole phone chhod ke kuch kaam kar, maine bola research kar raha hoon… memes ki 😄",
+"Teacher bola mobile kyu use kar rahe ho, student bola multitasking sir 😆",
+"Friend bola tu itna khush kyun hai, maine bola WiFi free mila 😁",
+"Mummy boli phone kam use karo, maine bola future bana raha hoon… screen time badha ke 😂",
+"Teacher bola homework kyun nahi kiya, student bola pen nahi tha… kal ka kal tha 😜",
+"Friend bola life ka plan kya hai, maine bola abhi lunch ka plan bana raha hoon 😋"
   ]);
  }
 
  // TIME
- if(match(text,["time"])){
+ if(match(text,["time","⏱️","⏲️","⏰","🕰","⌛","⏳","Date","din","samay"])){
   return "Abhi time hai "+new Date().toLocaleTimeString();
  }
 
