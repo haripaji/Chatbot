@@ -1,2 +1,0 @@
-# Chatbot
-A chat assistant
