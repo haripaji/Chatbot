@@ -6,106 +6,107 @@
 <title>Veda / Ayra Assistant</title>
 
 <style>
-:root {
-  --bg: #121212;
-  --card: #1e1e1e;
-  --primary: #0b84ff;
-  --text: #ffffff;
-}
-
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* Header */
-header {
-  padding: 15px;
-  text-align: center;
-  background: var(--card);
-}
-
-/* Floating Menu Button */
-#menu-btn {
-  position: fixed;
-  top: 70px;
-  left: 10px;
-  z-index: 1000;
-  background: #333;
+  background: #000;
   color: white;
-  border-radius: 50%;
+  font-family: sans-serif;
+}
+
+/* Top */
+#topbar {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+#userIcon {
   width: 45px;
   height: 45px;
-  border: none;
+  border-radius: 50%;
+  background: #444;
 }
 
 /* Sidebar */
 #sidebar {
   position: fixed;
   top: 0;
-  left: -260px;
-  width: 260px;
+  left: -100%;
+  width: 75%;
   height: 100%;
-  background: #1a1a1a;
-  padding: 15px;
+  background: rgba(50,50,50,0.95);
+  backdrop-filter: blur(10px);
   transition: 0.3s;
-  z-index: 999;
+  padding: 20px;
+  z-index: 1000;
 }
 
 #sidebar.open {
   left: 0;
 }
 
+.btn {
+  display: block;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 20px;
+  background: #444;
+  border: none;
+  color: white;
+}
+
 /* Chat */
-#chat-box {
-  height: calc(100vh - 140px);
+#chat {
+  height: 75vh;
   overflow-y: auto;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  padding: 10px;
 }
 
 .msg {
-  padding: 10px;
-  border-radius: 15px;
-  max-width: 75%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  margin: 5px;
+  max-width: 70%;
 }
 
-.user { background: var(--primary); align-self: flex-end; }
-.bot { background: var(--card); align-self: flex-start; }
+.user { background: #333; margin-left: auto; }
+.bot { background: #777; }
 
-/* Controls */
-.controls {
+.msg span {
+  cursor: pointer;
+  opacity: 0.7;
+}
+.msg span:hover { opacity: 1; }
+
+/* Input */
+#inputArea {
   position: fixed;
-  bottom: 30px;
+  bottom: 20px;
   width: 100%;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   padding: 10px;
-  background: var(--bg);
 }
 
-input {
+#input {
   flex: 1;
   padding: 12px;
   border-radius: 25px;
   border: none;
-  background: #2c2c2e;
+  background: #333;
   color: white;
 }
 
-button {
+#mic, #send {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
   border: none;
 }
 
-#mic-btn { background: red; }
-#send-btn { background: var(--primary); color: white; }
+#mic { background: linear-gradient(45deg,pink,purple); }
+#send { background: #2196f3; }
 
 /* Footer */
 #credit {
@@ -121,28 +122,33 @@ button {
 
 <body>
 
-<header>🤖 Veda / Ayra Assistant</header>
-
-<button id="menu-btn">☰</button>
-
-<div id="sidebar">
-  <h3>Settings</h3>
-  
-  <button onclick="saveMode('Veda')">Set Veda Permanent</button><br><br>
-  <button onclick="saveMode('Ayra')">Set Ayra Permanent</button><br><br>
-
-  <input id="username" placeholder="Enter name"><br><br>
-  <button onclick="saveUser()">Save User</button><br><br>
-
-  <button onclick="clearHistory()">Clear History</button>
+<!-- Top -->
+<div id="topbar">
+  <div id="userIcon"></div>
 </div>
 
-<div id="chat-box"></div>
+<!-- Sidebar -->
+<div id="sidebar">
+  <h2>Menu</h2>
 
-<div class="controls">
-  <button id="mic-btn">🎤</button>
-  <input id="input" placeholder="Type or speak...">
-  <button id="send-btn">➤</button>
+  <button class="btn" onclick="alert('Sign-in system future upgrade')">Sign in / up</button>
+  <button class="btn" onclick="setMode('Ayra')">Chat with Ayra</button>
+  <button class="btn" onclick="setMode('Veda')">Chat with Veda</button>
+  <button class="btn" onclick="showHistory()">See Chat History</button>
+  <button class="btn" onclick="clearHistory()">Clear Chat History</button>
+  <button class="btn" onclick="sendFeedback()">📩 Give Feedback</button>
+</div>
+
+<!-- Chat -->
+<div id="chat">
+  <div class="msg bot">Namaste! main aapka assistant hun 😊</div>
+</div>
+
+<!-- Input -->
+<div id="inputArea">
+  <button id="mic">🎤</button>
+  <input id="input" placeholder="thoughts input here">
+  <button id="send">➤</button>
 </div>
 
 <div id="credit">thoughts sounds bot version 0.001.1</div>
@@ -150,118 +156,155 @@ button {
 <script>
 const API_KEY = "YOUR_API_KEY_HERE";
 
-const chat = document.getElementById("chat-box");
+const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 
 // sidebar toggle
-document.getElementById("menu-btn").onclick = () => {
+document.getElementById("userIcon").onclick = () => {
   document.getElementById("sidebar").classList.toggle("open");
 };
 
-// history load
-window.onload = () => {
-  let history = JSON.parse(localStorage.getItem("chat")) || [];
-  history.forEach(m => addMessage(m.text, m.type));
-};
-
-// save history
-function saveHistory(text, type) {
-  let history = JSON.parse(localStorage.getItem("chat")) || [];
-  history.push({text, type});
-  localStorage.setItem("chat", JSON.stringify(history));
-}
-
-// clear history
-function clearHistory() {
-  localStorage.removeItem("chat");
-  chat.innerHTML = "";
-}
-
 // add message
-function addMessage(text, type) {
+function addMessage(text, type, save=true){
   let div = document.createElement("div");
   div.className = "msg " + type;
-  div.innerText = text;
+
+  let content = document.createElement("div");
+  content.innerText = text;
+  div.appendChild(content);
+
+  if(type==="bot"){
+    let actions = document.createElement("div");
+    actions.style.display="flex";
+    actions.style.gap="10px";
+    actions.style.marginTop="5px";
+
+    let copy = document.createElement("span");
+    copy.innerText="📋";
+    copy.onclick=()=>navigator.clipboard.writeText(text);
+
+    let like = document.createElement("span");
+    like.innerText="👍";
+    like.onclick=()=>like.style.color="green";
+
+    let dislike = document.createElement("span");
+    dislike.innerText="👎";
+    dislike.onclick=()=>dislike.style.color="red";
+
+    let speakBtn = document.createElement("span");
+    speakBtn.innerText="🔊";
+    speakBtn.onclick=()=>speak(text);
+
+    let share = document.createElement("span");
+    share.innerText="📤";
+    share.onclick=()=>{
+      if(navigator.share){
+        navigator.share({text});
+      }
+    };
+
+    actions.append(copy,like,dislike,speakBtn,share);
+    div.appendChild(actions);
+  }
+
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
-  saveHistory(text, type);
+
+  if(save) saveHistory(text,type);
 }
 
-// fallback
-function fallback(text) {
-  return "Main abhi iska jawab nahi de pa raha hoon.";
+// history
+function saveHistory(text,type){
+  let h=JSON.parse(localStorage.getItem("chat"))||[];
+  h.push({text,type});
+  localStorage.setItem("chat",JSON.stringify(h));
+}
+
+function showHistory(){
+  chat.innerHTML="";
+  let h=JSON.parse(localStorage.getItem("chat"))||[];
+  h.forEach(m=>addMessage(m.text,m.type,false));
+}
+
+function clearHistory(){
+  if(confirm("Delete chat history?")){
+    localStorage.removeItem("chat");
+    chat.innerHTML="";
+  }
 }
 
 // AI
-async function getAI(text) {
-  if (!API_KEY || API_KEY === "gen-lang-client-0203533754") return fallback(text);
+async function getAI(text){
+  if(!API_KEY || API_KEY==="YOUR_API_KEY_HERE"){
+    return "Hello! How are you?";
+  }
 
-  try {
-    let res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + API_KEY,
-        "Content-Type": "application/json"
+  try{
+    let res=await fetch("https://api.openai.com/v1/chat/completions",{
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer "+API_KEY,
+        "Content-Type":"application/json"
       },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{role: "user", content: text}]
+      body:JSON.stringify({
+        model:"gpt-4o-mini",
+        messages:[{role:"user",content:text}]
       })
     });
 
-    let data = await res.json();
+    let data=await res.json();
     return data.choices[0].message.content;
 
-  } catch {
-    return fallback(text);
+  }catch{
+    return "Network error.";
   }
 }
 
 // send
-async function send() {
-  let text = input.value.trim();
-  if (!text) return;
+async function send(){
+  let text=input.value.trim();
+  if(!text) return;
 
-  addMessage(text, "user");
-  input.value = "";
+  addMessage(text,"user");
+  input.value="";
 
-  let reply = await getAI(text);
-  addMessage(reply, "bot");
+  let reply=await getAI(text);
+  addMessage(reply,"bot");
   speak(reply);
 }
 
 // voice
-const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-rec.lang = "hi-IN";
+const rec=new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+rec.lang="en-IN";
 
-document.getElementById("mic-btn").onclick = () => rec.start();
-rec.onresult = e => {
-  input.value = e.results[0][0].transcript;
+document.getElementById("mic").onclick=()=>rec.start();
+rec.onresult=e=>{
+  input.value=e.results[0][0].transcript;
   send();
 };
 
 // speak
-function speak(text) {
-  let s = new SpeechSynthesisUtterance(text);
+function speak(text){
+  let s=new SpeechSynthesisUtterance(text);
   speechSynthesis.speak(s);
 }
 
+// mode
+function setMode(mode){
+  localStorage.setItem("mode",mode);
+  alert(mode+" mode activated");
+}
+
+// feedback
+function sendFeedback(){
+  window.location.href="mailto:harendrashrivastav44@gmail.com?subject=Feedback&body=Type your feedback...";
+}
+
 // events
-document.getElementById("send-btn").onclick = send;
-input.addEventListener("keypress", e => {
-  if (e.key === "Enter") send();
+document.getElementById("send").onclick=send;
+input.addEventListener("keypress",e=>{
+  if(e.key==="Enter") send();
 });
-
-// save mode
-function saveMode(mode) {
-  localStorage.setItem("mode", mode);
-}
-
-// save user
-function saveUser() {
-  let name = document.getElementById("username").value;
-  localStorage.setItem("user", name);
-}
 </script>
 
 </body>
