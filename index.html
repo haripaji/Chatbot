@@ -7,7 +7,7 @@
 
 <style>
 body{margin:0;background:#000;color:#fff;font-family:sans-serif}
-#menu{padding:10px;font-size:22px}
+#menu{padding:10px;font-size:22px;cursor:pointer}
 #sidebar{
  position:fixed;left:-100%;top:0;width:70%;height:100%;
  background:#222;padding:20px;transition:.3s;z-index:10
@@ -23,18 +23,23 @@ body{margin:0;background:#000;color:#fff;font-family:sans-serif}
 
 #inputArea{
  position:fixed;bottom:20px;width:100%;
- display:flex;gap:10px;padding:10px
+ display:flex;gap:10px;padding:10px;box-sizing:border-box
 }
 #input{flex:1;padding:12px;border-radius:25px;border:none;background:#333;color:#fff}
-#mic,#send,#voice{width:50px;height:50px;border:none;border-radius:50%}
+
+#mic,#send,#voice{
+ width:50px;height:50px;border:none;border-radius:50%;cursor:pointer
+}
+
 #mic{background:linear-gradient(45deg,pink,purple)}
 #mic.glow{box-shadow:0 0 15px pink}
 #send{background:#2196f3}
 #voice{background:#00c853}
 
-.typing{opacity:.6;font-size:12px}
-
-#credit{position:fixed;bottom:0;width:100%;text-align:center;font-size:11px;color:#777}
+#credit{
+ position:fixed;bottom:0;width:100%;
+ text-align:center;font-size:11px;color:#777
+}
 </style>
 </head>
 
@@ -62,70 +67,39 @@ body{margin:0;background:#000;color:#fff;font-family:sans-serif}
 <div id="credit">thoughts sounds bot version 0.001.1</div>
 
 <script>
-const API_KEY=""; // paste later
 
+// ===== ELEMENTS =====
 const chat=document.getElementById("chat");
 const input=document.getElementById("input");
 const mic=document.getElementById("mic");
 const voiceBtn=document.getElementById("voice");
+const sendBtn=document.getElementById("send");
 const sidebar=document.getElementById("sidebar");
 
-// sidebar
+// ===== SIDEBAR =====
 menu.onclick=()=>toggleSidebar();
 function toggleSidebar(){sidebar.classList.toggle("open")}
 
-// user memory
+// ===== USER DATA =====
 let userData={
- name:localStorage.getItem("name")||"",
- age:localStorage.getItem("age")||"",
- role:localStorage.getItem("role")||""
+ name:localStorage.getItem("name")||""
 };
 
-// abuse
-let abuseCount=0;
-const badWords=["bc","mc","fuck","shit","idiot","stupid"];
+// ===== UTILS =====
+function clean(t){return t.toLowerCase().trim()}
+function rand(a){return a[Math.floor(Math.random()*a.length)]}
+function match(t,arr){return arr.some(w=>t.includes(w))}
 
-function isAbuse(t){return badWords.some(w=>t.includes(w))}
-
-// add message
+// ===== MESSAGE =====
 function addMessage(text,type){
  let d=document.createElement("div");
  d.className="msg "+type;
  d.innerText=text;
-
- if(type==="bot"){
-  let a=document.createElement("div");
-
-  let copy=document.createElement("span");
-  copy.innerText="📋";
-  copy.onclick=()=>navigator.clipboard.writeText(text);
-
-  let speakBtn=document.createElement("span");
-  speakBtn.innerText=" 🔊";
-  speakBtn.onclick=()=>speak(text);
-
-  let like=document.createElement("span");
-  like.innerText=" 👍";
-  like.onclick=()=>addMessage("Thanks 😊 mujhe help karke accha laga","bot");
-
-  a.append(copy,speakBtn,like);
-  d.appendChild(a);
- }
-
  chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
 }
 
-// typing
-function typing(){
- let t=document.createElement("div");
- t.className="msg bot typing";
- t.innerText="Veda typing...";
- chat.appendChild(t);
- return t;
-}
-
-// speak
+// ===== SPEAK =====
 function speak(text){
  speechSynthesis.cancel();
  let u=new SpeechSynthesisUtterance(text);
@@ -133,120 +107,153 @@ function speak(text){
  speechSynthesis.speak(u);
 }
 
-// name detect
-function detectName(t){
- if(t.includes("my name is")){
-  let n=t.split(" ").pop();
+// ===== BRAIN =====
+function getReply(text){
+
+ text=clean(text);
+
+ // NAME SET
+ if(match(text,["my name is","mera naam","i am","main hoon"])){
+  let n=text.split(" ").pop();
   userData.name=n;
   localStorage.setItem("name",n);
   return "Nice to meet you "+n+" 😊";
  }
- if(t.includes("my name")){
-  return userData.name? "Your name is "+userData.name+" 😎":"I don't know your name yet 😅";
- }
-}
 
-// age detect
-function detectAge(t){
- let n=t.match(/\d+/);
- if(n){
-  let age=parseInt(n[0]);
-  userData.age=age;
-  localStorage.setItem("age",age);
-  if(age<18){
-   userData.role="student";
-   return "Nice 😊 student ho, padhai pe focus rakho 📚";
-  }else{
-   userData.role="adult";
-   return "Great 👍 apne goals pe kaam karo 💼";
-  }
- }
-}
-
-// reply brain
-function getReply(text){
- text=text.toLowerCase();
-
- if(isAbuse(text)){
-  abuseCount++;
-  if(abuseCount<10) return "😡 calm raho, kya problem hai?";
-  if(abuseCount<20) return "😂 itna gussa mat karo, ek joke suno: coder kabhi sota nahi 😆";
-  return "🚫 stop abusing!";
+ // NAME ASK
+ if(match(text,["mera naam kya hai","what is my name"])){
+  return userData.name 
+   ? "Tumhara naam "+userData.name+" hai 😎"
+   : "Mujhe abhi tumhara naam nahi pata 😅";
  }
 
- let nameRes=detectName(text);
- if(nameRes) return nameRes;
+ // GREETING
+ if(match(text,["hello","hi","hey","helo","hii","namaste","yo"])){
+  return rand([
+   "Hello 😊 kaise ho?",
+   "Hi 👋 kya haal hai?",
+   "Hey 😄 kya chal raha hai?",
+   "Namaste 🙏 kaise ho?"
+  ]);
+ }
 
- let ageRes=detectAge(text);
- if(ageRes) return ageRes;
+ // HOW ARE YOU
+ if(match(text,["kaise ho","how are you","kese ho","kya haal"])){
+  return rand([
+   "Main badhiya hoon 😄 tum batao?",
+   "Sab mast 👍 tum kaise ho?",
+   "Main theek hoon 😊 tum sunao?"
+  ]);
+ }
 
- let reply;
+ // HELP
+ if(match(text,["help","madad","assist"])){
+  return "Main help ke liye hoon 😊 batao kya chahiye";
+ }
 
- if(text.includes("hello")) reply="Hello 😊 kaise ho?";
- else if(text.includes("how are you")) reply="Main badhiya hoon 😄 tum batao?";
- else reply="Samajh nahi aaya 🤔";
+ // HAPPY
+ if(match(text,["happy","khush","awesome","mast","great"])){
+  return "Nice 😄 ye sunke accha laga!";
+ }
+
+ // SAD
+ if(match(text,["sad","dukhi","tension","stress","problem"])){
+  return "Kya hua? 😔 batao main sun raha hoon";
+ }
+
+ // THANKS
+ if(match(text,["thanks","thank you","thx"])){
+  return "You're welcome 😊";
+ }
+
+ // BYE
+ if(match(text,["bye","goodbye"])){
+  return "Bye 👋 phir milte hain";
+ }
+
+ // JOKE
+ if(match(text,["joke","funny","hasao"])){
+  return rand([
+   "😂 coder kabhi sota nahi",
+   "🤣 bug hi life ban gaya",
+   "😆 computer ko thand lag gayi"
+  ]);
+ }
+
+ // TIME
+ if(match(text,["time"])){
+  return "Abhi time hai "+new Date().toLocaleTimeString();
+ }
+
+ // DEFAULT
+ let r=rand([
+  "Samajh nahi aaya 🤔 thoda aur batao",
+  "Interesting 😄 aur bolo",
+  "Main sun raha hoon 👀",
+  "Thoda aur explain karo 😊"
+ ]);
 
  if(userData.name && Math.random()<0.3){
-  reply=userData.name+", "+reply;
+  r=userData.name+", "+r;
  }
 
- return reply;
+ return r;
 }
 
-// send
-async function send(){
+// ===== SEND =====
+function sendMessage(){
  let text=input.value.trim();
  if(!text) return;
 
  addMessage(text,"user");
  input.value="";
 
- let t=typing();
- await new Promise(r=>setTimeout(r,700));
- t.remove();
-
  let reply=getReply(text);
- addMessage(reply,"bot");
+ setTimeout(()=>addMessage(reply,"bot"),400);
 }
 
-// mic
-const rec=new(window.SpeechRecognition||webkitSpeechRecognition)();
+// ===== BUTTON EVENTS =====
+sendBtn.onclick=sendMessage;
+input.addEventListener("keypress",e=>{
+ if(e.key==="Enter") sendMessage();
+});
+
+// ===== MIC =====
+const rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
 rec.lang="en-IN";
 
 mic.onclick=()=>rec.start();
+
 rec.onstart=()=>mic.classList.add("glow");
 rec.onend=()=>mic.classList.remove("glow");
 rec.onerror=()=>mic.classList.remove("glow");
 
-rec.onresult=e=>{
- input.value=e.results[0][0].transcript;
- send();
-};
-
-// voice mode
 let voiceMode=false;
+
+// ===== VOICE MODE =====
 voiceBtn.onclick=()=>{
  voiceMode=!voiceMode;
  voiceBtn.innerText=voiceMode?"🛑":"🎧";
  if(voiceMode) rec.start();
 };
 
-rec.onresult=e=>{
+// ===== SINGLE RESULT =====
+rec.onresult=(e)=>{
  let text=e.results[0][0].transcript;
- addMessage(text,"user");
 
- let reply=getReply(text);
- addMessage(reply,"bot");
- speak(reply);
-
- if(voiceMode) setTimeout(()=>rec.start(),500);
+ if(!voiceMode){
+  input.value=text;
+  sendMessage();
+ }else{
+  addMessage(text,"user");
+  let reply=getReply(text);
+  addMessage(reply,"bot");
+  speak(reply);
+  setTimeout(()=>rec.start(),500);
+ }
 };
 
-// events
-send.onclick=send;
-input.addEventListener("keypress",e=>{if(e.key==="Enter") send()});
-
-// extra
+// ===== EXTRA =====
 function clearHistory(){
  if(confirm("Clear chat?")) chat.innerHTML="";
 }
@@ -254,6 +261,7 @@ function clearHistory(){
 function feedback(){
  window.location.href="mailto:harendrashrivastav44@gmail.com";
 }
+
 </script>
 
 </body>
