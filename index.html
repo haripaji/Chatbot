@@ -136,131 +136,84 @@ function getReply(text){
 
  text=clean(text);
 
- // NAME SET
- if(match(text,["my name is","mera naam","Mera naam hai","Mera name","My name is","I'm","Mai hu","i am","main hoon"])){
-  let n=text.split(" ").pop();
-  userData.name=n;
-  localStorage.setItem("name"," Naam","Name",n);
-  return "Nice to meet you "+n+" 😊";
- }
+ // ===== EXPERT BRAIN (UPGRADED) =====
 
- // NAME ASK
- if(match(text,["mera naam kya hai","what is my name"])){
-  return userData.name 
-   ? "Tumhara naam "+userData.name+" hai 😎"
-   : "Mujhe abhi tumhara naam nahi pata 😅";
- }
+// Expert Response Database
+const expertData = {
+    greetings: ["Namaste! Main Veda AI hoon, aapka conversation expert. Boliye kaise madad karoon?", "Hello! Ek naye aur intelligent discussion ke liye main taiyaar hoon.", "Swagat hai! Aaj hum kis baare mein baat karenge?"],
+    coding: ["Logic build karna coding ki pehli seedhi hai. Kya aapko code optimize karna hai?", "Developer perspective se dekhein toh ye kaafi interesting sawal hai.", "Syntax ki chinta mat kijiye, pehle algorithm par dhyan dein."],
+    creative: ["World-building ek art hai. Kya hum aapke 'Aryan' character ya 15th-century world par baat karein?", "Aapka creative vision kaafi unique hai. Ise aur expand karte hain."],
+    ai_tech: ["AI fundamentals seekhna aaj ke samay mein bahut zaroori hai. Kya aapne apna roadmap shuru kiya?", "Neural networks aur logic hi AI ki jaan hai."],
+    fallback: ["Hmm, main samajh raha hoon. Is par thoda aur detail mein baat karte hain?", "Interesting point! Kya aap ise thoda aur explain karenge?", "Main sun raha hoon, bataiye iske peeche ka kya logic hai?"]
+};
 
- // GREETING
- if(match(text,["hello","hi"," Hello ","👋","hey","helo","hii","namaste","yo"])){
-  return rand([
-   "Hello 😊 kaise ho?",
-   "Hi 👋 kya haal hai?",
-   "Hey 😄 kya chal raha hai?",
-   "Namaste 🙏 kaise ho?"
-  ]);
- }
+function getReply(text) {
+    text = text.toLowerCase().trim();
 
- // HOW ARE YOU
- if(match(text,["kaise ho","how are you","kese ho","kya haal"])){
-  return rand([
-   "Main badhiya hoon 😄 tum batao?",
-   "Sab mast 👍 tum kaise ho?",
-   "Main theek hoon 😊 tum sunao?"
-  ]);
- }
+    // 1. NAME SETTING LOGIC
+    if (text.includes("mera naam") || text.includes("my name is")) {
+        let n = text.split(" ").pop();
+        userData.name = n;
+        localStorage.setItem("name", n);
+        return `Aapse milkar khushi hui, ${n}! Main aapka naam yaad rakhunga.`;
+    }
 
- // HELP
- if(match(text,["help","madad","meri help karo","assist"])){
-  return "Main help ke liye hoon 😊 batao kya chahiye",
-     " haan bolo 😀",
-     "Main poori koshish karunga 😊 batao kya help chahiye";
- }
+    // 2. EXPERT CONTEXT MATCHING
+    if (match(text, ["hi", "hello", "namaste", "hey"])) {
+        return rand(expertData.greetings);
+    }
+    
+    if (match(text, ["kaise ho", "how are you"])) {
+        return "Main ek Expert AI hoon, hamesha ki tarah optimize aur fast! Aap kaise hain?";
+    }
 
- // HAPPY
- if(match(text,["happy","khush","awesome","mast","great"])){
-  return "Nice 😄 ye sunke accha laga!";
- }
+    if (match(text, ["code", "html", "javascript", "fix", "developer"])) {
+        return rand(expertData.tech);
+    }
 
- // SAD
- if(match(text,["sad","dukhi","tension","stress","problem"])){
-  return "Kya hua? 😔 batao main sun raha hoon",
-   " mujhe bata sakte hai 😊 ho sakta hai main help kar paaun";
- }
+    if (match(text, ["story", "novel", "fantasy", "aryan", "chakra"])) {
+        return rand(expertData.creative);
+    }
 
- // THANKS
- if(match(text,["thanks","thank you","Thanks","thx"])){
-  return "You're welcome 😊",
-   " aapke liye hamesa taiyar 🥰";
- }
+    if (match(text, ["ai", "robot", "intelligence", "machine"])) {
+        return rand(expertData.ai_tech);
+    }
 
- // BYE
- if(match(text,["bye","goodbye"])){
-  return "Bye 👋 phir milte hain",
-   " Apke sath maja aaya par mai aapko bhool sakta hun par aap mujhe yaad rakhna bye",
-   "mere sath time spend karne ke liye thankyou! bye 💗";
- }
+    if (match(text, ["joke", "hasao", "funny"])) {
+        return rand([
+            "Ek programmer ki life: 10% coding, 90% dhoondhna ki error kahan hai! 😂",
+            "Teacher: 2+2 kitna hota hai? Coder: Pehle ye batao ki data type 'Int' hai ya 'String'? 😆",
+            "Why do programmers prefer dark mode? Because light attracts bugs! 🤣"
+        ]);
+    }
 
- // JOKE
- if(match(text,["joke","funny","hasao"])){
-  return rand([
-   "😂 coder kabhi sota nahi",
-   "🤣 bug hi life ban gaya",
-   "😆 computer ko thand lag gayi",
-   "Teacher ne pucha homework kahan hai, student bola dog kha gaya… teacher bola tumhare paas dog hi nahi hai, student bola isi liye toh shock mein hoon 😂",
-"Mummy boli phone chhod aur padhai kar, maine bola 5 minute… 5 minute baad mummy boli bas karo, maine bola disturb mat karo 😆",
-"Friend bola gym kab se ja raha hai, maine bola kal se… friend bola kal kab aayega 🤣",
-"Teacher bola 2+2 kitna hota hai, student bola 4… phir bola mood ho toh 5 bhi ho sakta hai 😜",
-"Papa bole bade ho kar kya banoge, beta bola charger… kyunki sab mujhe hi dhoondte rehte hain 😁",
-"Exam mein likha success kya hai, answer diya jab net fast ho aur buffering na ho 😎",
-"Friend bola late kyun aaya, maine bola Google Maps ne galat raasta dikha diya… par main toh ghar pe hi tha 😂",
-"Mummy boli itna hans kyun raha hai, maine bola meme dekha… mummy boli hume bhi dikha, maine bola aapko samajh nahi aayega 😄",
-"Teacher bola class mein sabse intelligent kaun hai, student bola main… kyunki main hi sabse kam bolta hoon 😆",
-"Doctor bola tumhe rest chahiye, maine bola phone ka kya karu… doctor bola usko bhi rest de do 😅",
-"Friend bola tu itna serious kyun hai, maine bola battery low hai 😂",
-"Mummy boli jaldi soya karo, maine bola dreams ka episode miss ho jayega 😴😆",
-"Teacher bola late kyun aaye, student bola sapna dekh raha tha ki time pe aaya hoon 😂",
-"Friend bola itna confidence kaise hai, maine bola galtiyon ka experience hai 😎",
-"Papa bole phone chhod ke kuch kaam kar, maine bola research kar raha hoon… memes ki 😄",
-"Teacher bola mobile kyu use kar rahe ho, student bola multitasking sir 😆",
-"Friend bola tu itna khush kyun hai, maine bola WiFi free mila 😁",
-"Mummy boli phone kam use karo, maine bola future bana raha hoon… screen time badha ke 😂",
-"Teacher bola homework kyun nahi kiya, student bola pen nahi tha… kal ka kal tha 😜",
-"Friend bola life ka plan kya hai, maine bola abhi lunch ka plan bana raha hoon 😋"
-  ]);
- }
+    if (match(text, ["time", "samay", "date"])) {
+        return "Abhi ka samay hai: " + new Date().toLocaleTimeString();
+    }
 
- // TIME
- if(match(text,["time","⏱️","⏲️","⏰","🕰","⌛","⏳","Date","din","samay"])){
-  return "Abhi time hai "+new Date().toLocaleTimeString();
- }
-
- // DEFAULT
- let r=rand([
-  "Samajh nahi aaya 🤔 thoda aur batao",
-  "Interesting 😄 aur bolo",
-  "Main sun raha hoon 👀",
-  "Thoda aur explain karo 😊"
- ]);
-
- if(userData.name && Math.random()<0.3){
-  r=userData.name+", "+r;
- }
-
- return r;
+    // 3. SMART FALLBACK (Expert Style)
+    let r = rand(expertData.fallback);
+    return (userData.name) ? `${userData.name}, ${r.toLowerCase()}` : r;
 }
 
-// ===== SEND =====
-function sendMessage(){
- let text=input.value.trim();
- if(!text) return;
+// ===== IMPROVED SEND & DISPLAY =====
+function sendMessage() {
+    let text = input.value.trim();
+    if (!text) return;
 
- addMessage(text,"user");
- input.value="";
+    addMessage(text, "user");
+    input.value = "";
 
- let reply=getReply(text);
- setTimeout(()=>addMessage(reply,"bot"),400);
+    // Expert style delay for realistic feel
+    setTimeout(() => {
+        let reply = getReply(text);
+        addMessage(reply, "bot");
+        
+        // Agar voice mode on hai toh bol kar bataye
+        if(voiceMode) speak(reply);
+    }, 800);
 }
+
 
 // ===== BUTTON EVENTS =====
 sendBtn.onclick=sendMessage;
