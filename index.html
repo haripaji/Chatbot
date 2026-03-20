@@ -3,43 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Veda Smart Bot</title>
+<title>Veda Smart Bot - Expert AI</title>
 
 <style>
-body{margin:0;background:#000;color:#fff;font-family:sans-serif}
-#menu{padding:10px;font-size:22px;cursor:pointer}
+/* --- Design Control --- */
+body{margin:0;background:#000;color:#fff;font-family:'Segoe UI', sans-serif; overflow: hidden;}
+#menu{padding:15px;font-size:24px;cursor:pointer; background: #111; display: inline-block; border-radius: 0 0 10px 0;}
+
 #sidebar{
- position:fixed;left:-100%;top:0;width:70%;height:100%;
- background:#222;padding:20px;transition:.3s;z-index:10
+ position:fixed;left:-100%;top:0;width:250px;height:100%;
+ background:#111;padding:20px;transition:.4s;z-index:100; border-right: 1px solid #333;
 }
 #sidebar.open{left:0}
-.btn{display:block;margin:10px 0;padding:10px;background:#333;border:none;color:#fff;border-radius:20px}
+.btn{display:block;width:100%;margin:15px 0;padding:12px;background:#222;border:1px solid #444;color:#fff;border-radius:10px; cursor: pointer; transition: 0.3s;}
+.btn:hover{background:#333;}
 
-#chat{height:75vh;overflow:auto;padding:10px}
-.msg{padding:10px;border-radius:15px;margin:5px;max-width:70%;animation:fade .3s}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-.user{background:#333;margin-left:auto}
-.bot{background:#555}
+#chat{height:75vh;overflow-y:auto;padding:20px; display: flex; flex-direction: column; gap: 15px;}
+.msg{padding:12px 18px;border-radius:18px;max-width:75%; font-size: 15px; line-height: 1.5; position: relative; animation: slideUp 0.3s ease;}
+@keyframes slideUp{from{transform: translateY(10px); opacity: 0;} to{transform: translateY(0); opacity: 1;}}
+
+.user{background:#2563eb; color: #fff; align-self: flex-end; border-bottom-right-radius: 2px;}
+.bot{background:#2d2d2d; color: #eee; align-self: flex-start; border-bottom-left-radius: 2px;}
 
 #inputArea{
- position:fixed;bottom:20px;width:100%;
- display:flex;gap:10px;padding:10px;box-sizing:border-box
+ position:fixed;bottom:25px;width:100%; max-width: 600px; left: 50%; transform: translateX(-50%);
+ display:flex;gap:10px;padding:0 15px;box-sizing:border-box; z-index: 5;
 }
-#input{flex:1;padding:12px;border-radius:25px;border:none;background:#333;color:#fff}
+#input{flex:1;padding:15px;border-radius:30px;border:1px solid #333;background:#1a1a1a;color:#fff; outline: none; font-size: 16px;}
+#input:focus{border-color: #2563eb;}
 
-#mic,#send,#voice{
- width:50px;height:50px;border:none;border-radius:50%;cursor:pointer
-}
+.icon-btn{ width:50px;height:50px;border:none;border-radius:50%;cursor:pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s;}
+#mic{background: linear-gradient(45deg, #f472b6, #a855f7); color: white;}
+#mic.glow{box-shadow:0 0 20px #f472b6; transform: scale(1.1);}
+#send{background:#2563eb; color: white;}
+#voice{background:#059669; color: white;}
 
-#mic{background:linear-gradient(45deg,pink,purple)}
-#mic.glow{box-shadow:0 0 15px pink}
-#send{background:#2196f3}
-#voice{background:#00c853}
+#credit{position:fixed;bottom:5px;width:100%;text-align:center;font-size:10px;color:#444; letter-spacing: 1px;}
 
-#credit{
- position:fixed;bottom:0;width:100%;
- text-align:center;font-size:11px;color:#777
-}
+/* Actions inside bot msg */
+.actions{margin-top:8px; display:flex; gap:12px; border-top: 1px solid #444; padding-top: 5px; opacity: 0.7;}
+.actions span{cursor:pointer; font-size: 14px;}
+.actions span:hover{opacity: 1; color: #2563eb;}
 </style>
 </head>
 
@@ -48,64 +52,126 @@ body{margin:0;background:#000;color:#fff;font-family:sans-serif}
 <div id="menu">☰</div>
 
 <div id="sidebar">
+ <h3 style="color:#2563eb">Veda Settings</h3>
  <button class="btn" onclick="toggleSidebar()">⬅ Back</button>
- <button class="btn" onclick="clearHistory()">🗑 Clear History</button>
+ <button class="btn" onclick="clearHistory()">🗑 Clear Chat</button>
  <button class="btn" onclick="feedback()">📩 Feedback</button>
 </div>
 
-<div id="chat">
- <div class="msg bot">Namaste 😊 Main Veda Smart Bot hoon</div>
+<div id="chat" id="chatBox">
+ <div class="msg bot">Namaste! Main Veda Smart AI hoon. Main aapka conversation expert aur development assistant hoon. 😊</div>
 </div>
 
 <div id="inputArea">
- <button id="mic">🎤</button>
- <input id="input" placeholder="Type or speak...">
- <button id="voice">🎧</button>
- <button id="send">➤</button>
+ <button id="mic" class="icon-btn">🎤</button>
+ <input id="input" placeholder="Yahan kuch likhein ya bolein..." autocomplete="off">
+ <button id="voice" class="icon-btn">🎧</button>
+ <button id="send" class="icon-btn">➤</button>
 </div>
 
-<div id="credit">thoughts sounds bot version 0.001.1</div>
+<div id="credit">VEDA AI VERSION 1.0.1 • POWERED BY EXPERT LOGIC</div>
 
 <script>
-
 // ===== ELEMENTS =====
-const chat=document.getElementById("chat");
-const input=document.getElementById("input");
-const mic=document.getElementById("mic");
-const voiceBtn=document.getElementById("voice");
-const sendBtn=document.getElementById("send");
-const sidebar=document.getElementById("sidebar");
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const mic = document.getElementById("mic");
+const voiceBtn = document.getElementById("voice");
+const sendBtn = document.getElementById("send");
+const sidebar = document.getElementById("sidebar");
+const menu = document.getElementById("menu");
 
 // ===== SIDEBAR =====
-menu.onclick=()=>toggleSidebar();
-function toggleSidebar(){sidebar.classList.toggle("open")}
+menu.onclick = () => sidebar.classList.toggle("open");
+function toggleSidebar() { sidebar.classList.remove("open"); }
 
 // ===== USER DATA =====
-let userData={
- name:localStorage.getItem("name")||""
+let userData = { name: localStorage.getItem("veda_name") || "" };
+
+// ===== EXPERT BRAIN =====
+const brain = {
+    greetings: ["Hello! Kaise ho?", "Namaste! Aaj kya naya seekhna hai?", "Hi, main hazir hoon. Boliye!"],
+    tech: ["Coding mein logic hi sabkuch hai. Kya help chahiye?", "Clean code hi ek achhe developer ki pehchan hai.", "AI aur Web ka combination future hai!"],
+    creative: ["Veda AI aapke creative ideas ko support karta hai. Boliye!", "Storytelling mein deep dive karna hai? Chaliye shuru karte hain."],
+    fallback: ["Hmm, dilchasp hai. Thoda detail mein batayenge?", "Main samajh raha hoon. Aur boliye...", "Accha! Is par aapka kya vichaar hai?"]
 };
 
-// ===== UTILS =====
-function clean(t){return t.toLowerCase().trim()}
-function rand(a){return a[Math.floor(Math.random()*a.length)]}
-function match(t,arr){return arr.some(w=>t.includes(w))}
+function getReply(text) {
+    text = text.toLowerCase().trim();
+    if(text.includes("name is") || text.includes("naam hai")) {
+        let n = text.split(" ").pop();
+        userData.name = n;
+        localStorage.setItem("veda_name", n);
+        return `Aapse milkar khushi hui ${n}!`;
+    }
+    if(text.includes("hi") || text.includes("hello") || text.includes("namaste")) return brain.greetings[Math.floor(Math.random()*3)];
+    if(text.includes("code") || text.includes("fix") || text.includes("html")) return brain.tech[Math.floor(Math.random()*3)];
+    if(text.includes("story") || text.includes("creative")) return brain.creative[Math.floor(Math.random()*2)];
+    if(text.includes("time")) return "Abhi " + new Date().toLocaleTimeString() + " ho raha hai.";
+    
+    return brain.fallback[Math.floor(Math.random()*3)];
+}
 
-// Replace old addMessage() with this fixed version
-function addMessage(text,type){
-    let d=document.createElement("div");
-    d.className="msg "+type;
-    d.innerText=text;
+// ===== MESSAGE UI =====
+function addMessage(text, type) {
+    let d = document.createElement("div");
+    d.className = "msg " + type;
+    d.innerText = text;
 
-    if(type==="bot"){
-        let actions=document.createElement("div");
-        actions.style.marginTop="5px";
-        actions.style.fontSize="14px";
-        actions.style.display="flex";
-        actions.style.gap="10px";
+    if(type === "bot") {
+        let actions = document.createElement("div");
+        actions.className = "actions";
+        actions.innerHTML = `<span onclick="copyTxt('${text}')">📋</span> <span onclick="speak('${text}')">🔊</span>`;
+        d.appendChild(actions);
+    }
 
-        let like=document.createElement("span");
-        like.innerText="👍";
-        like.style.cursor="pointer";
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+    return d;
+}
+
+function copyTxt(t) { navigator.clipboard.writeText(t); alert("Copied!"); }
+
+// ===== LOGIC =====
+function sendMessage() {
+    let t = input.value.trim();
+    if(!t) return;
+    addMessage(t, "user");
+    input.value = "";
+    
+    setTimeout(() => {
+        let r = getReply(t);
+        addMessage(r, "bot");
+    }, 600);
+}
+
+sendBtn.onclick = sendMessage;
+input.onkeypress = (e) => { if(e.key === "Enter") sendMessage(); };
+
+// ===== VOICE & SPEECH =====
+function speak(t) {
+    let s = new SpeechSynthesisUtterance(t);
+    s.lang = "hi-IN";
+    window.speechSynthesis.speak(s);
+}
+
+const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+rec.lang = "hi-IN";
+mic.onclick = () => rec.start();
+rec.onstart = () => mic.classList.add("glow");
+rec.onend = () => mic.classList.remove("glow");
+rec.onresult = (e) => {
+    input.value = e.results[0][0].transcript;
+    sendMessage();
+};
+
+// ===== EXTRA =====
+function clearHistory() { if(confirm("Clear chat?")) chat.innerHTML = ""; }
+function feedback() { window.open("mailto:harendrashrivastav44@gmail.com"); }
+
+</script>
+</body>
+</html>
         like.onclick=()=>addMessage("Thanks 😊","bot");
 
         let dislike=document.createElement("span");
