@@ -81,6 +81,22 @@
     function getReply(text) {
         text = text.toLowerCase().trim();
 
+        // --- WIKIPEDIA API FUNCTION ---
+async function fetchWikiData(query) {
+    // Wikipedia Hindi API URL
+    const url = `https://hi.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null; // Agar page nahi mila
+        const data = await response.json();
+        return data.extract; // Wikipedia ki summary return karega
+    } catch (error) {
+        console.error("API Error:", error);
+        return null;
+    }
+}
+
         // MATH HANDLER
         const mathChars = /^[0-9+\-*/().\s]+$/;
         if (mathChars.test(text) && /[0-9]/.test(text)) {
