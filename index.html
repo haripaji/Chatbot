@@ -147,7 +147,7 @@
     </div>
 </div>
 
-<script>
+<script src="responses.js">
     const chat = document.getElementById('chat');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send');
@@ -243,9 +243,6 @@
         handleSend();
     };
 
-</script>
-<script>
-
     if(text.includes("story") || text.includes("creative")) return brain.creative[Math.floor(Math.random()*2)];
     if(text.includes("time")) return "Abhi " + new Date().toLocaleTimeString() + " ho raha hai.";
     
@@ -309,8 +306,7 @@ rec.onresult = (e) => {
 function clearHistory() { if(confirm("Clear chat?")) chat.innerHTML = ""; }
 function feedback() { window.open("mailto:harendrashrivastav44@gmail.com"); }
 
-</script>
-<script>
+
         like.onclick=()=>addMessage("Thanks 😊","bot");
 
         let dislike=document.createElement("span");
