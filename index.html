@@ -96,7 +96,16 @@ async function fetchWikiData(query) {
         return null;
     }
 }
-
+ 
+        {
+  "mcpServers": {
+    "dataandapis": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://dataandapis.com/mcp", "--header", "X-Api-Key:${DATAANDAPIS_KEY}"],
+      "env": { "DATAANDAPIS_KEY": "your-api-key" }
+    }
+  }
+}
         // MATH HANDLER
         const mathChars = /^[0-9+\-*/().\s]+$/;
         if (mathChars.test(text) && /[0-9]/.test(text)) {
