@@ -1,190 +1,1180 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Veda AI chatbot</title>
-    <style>
-        :root { --primary: #7c3aed; --bg: #0b0f1a; --card: #1e293b; --text: #f8fafc; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* Header */
-        header { padding: 15px; background: #0f172a; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; }
-        .menu-icon { font-size: 24px; cursor: pointer; margin-right: 15px; color: var(--primary); padding: 5px; }
-        .title { flex: 1; font-weight: bold; letter-spacing: 1px; font-size: 1.1rem; }
-        .user-tag { font-size: 10px; opacity: 0.5; border: 1px solid rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veda AI — Smart Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script>
+    if (typeof tailwind !== 'undefined') {
+      tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9'
+            }
+          }
+        }
+      }
+    };
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: 'Inter', system-ui, sans-serif; }
 
-        /* Sidebar Menu */
-        #sidebar { position: fixed; left: -280px; top: 0; width: 260px; height: 100%; background: #0f172a; transition: 0.3s ease; z-index: 1000; padding: 20px; box-shadow: 10px 0 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
-        #sidebar.active { left: 0; }
-        .side-btn { width: 100%; padding: 15px; margin-bottom: 10px; background: var(--card); border: none; color: white; border-radius: 12px; text-align: left; font-size: 14px; cursor: pointer; }
-        .side-btn:active { background: var(--primary); }
+    /* Custom subtle scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
 
-        /* Chat Area */
-        #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 16px; line-height: 1.5; word-wrap: break-word; }
-        .user { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 2px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2); }
-        .bot { align-self: flex-start; background: var(--card); border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.05); }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-animate { animation: fadeSlideUp 0.22s ease-out forwards; }
 
-        /* Bottom Input bar */
-        .input-box { padding: 15px; background: var(--bg); border-top: 1px solid rgba(255,255,255,0.05); }
-        #wrapper { display: flex; align-items: center; background: var(--card); border-radius: 30px; padding: 5px 15px; gap: 10px; }
-        input { flex: 1; background: transparent; border: none; color: white; padding: 12px 5px; font-size: 16px; outline: none; }
-        .icon { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 5px; }
-        #send-btn { color: var(--primary); font-size: 24px; }
-        .mic-on { color: #ef4444 !important; }
-    </style>
+    @keyframes pulseDot {
+      0%, 80%, 100% { transform: scale(0.65); opacity: 0.45; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .typing-dot { animation: pulseDot 1.2s infinite ease-in-out; }
+    .typing-dot:nth-child(2) { animation-delay: 0.16s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.32s; }
+
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+      50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    }
+    .mic-recording { animation: micPulse 1.4s infinite; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 antialiased overflow-hidden">
 
-<header>
-    <div class="menu-icon" onclick="toggleMenu()">☰</div>
-    <div class="title">VEDA AI</div>
-    <div id="display-id" class="user-tag">ID...</div>
-</header>
+  <div class="flex h-screen w-full overflow-hidden">
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-xs hidden lg:hidden transition-opacity"></div>
 
-<div id="sidebar">
-    <h2 style="color:var(--primary); margin-bottom: 20px;">Menu</h2>
-    <button class="side-btn" onclick="saveChatData()">💾 Save Chat</button>
-    <button class="side-btn" onclick="sendFeedback()">📧 Feedback & Support</button>
-    <button class="side-btn" onclick="location.reload()" style="background:#ef444422">🔄 Reset Chat</button>
-    <div style="margin-top: auto; font-size: 10px; opacity: 0.3; text-align: center;">Veda Engine v1.0</div>
-    <button class="side-btn" onclick="toggleMenu()" style="margin-top: 15px; background: #334155; text-align: center;">Close</button>
-</div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 shrink-0 -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out bg-white dark:bg-[#0f1624] border-r border-slate-200 dark:border-slate-800/80 flex flex-col">
+      <!-- Brand Header -->
+      <div class="h-16 px-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/25">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l2.2 6.2L20.5 12l-6.3 2.8L12 21l-2.2-6.2L3.5 12l6.3-2.8L12 3z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="font-bold text-sm tracking-wide text-slate-900 dark:text-white flex items-center gap-1.5">
+              VEDA AI
+              <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">v2.0</span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Smart Hinglish Assistant</p>
+          </div>
+        </div>
+        <button id="close-sidebar-btn" type="button" aria-label="Close menu" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
 
-<div id="chat"></div>
+      <!-- New Chat Action -->
+      <div class="p-4">
+        <button id="new-chat-btn" type="button" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md shadow-violet-600/20 transition-all cursor-pointer">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>New Chat</span>
+        </button>
+      </div>
 
-<div class="input-box">
-    <div id="wrapper">
-        <button id="mic-btn" class="icon">🎤</button>
-        <input type="text" id="user-input" placeholder="Message Veda..." autocomplete="off">
-        <button id="send-btn" class="icon">➤</button>
+      <!-- Sidebar Scrollable Content -->
+      <div class="flex-1 overflow-y-auto px-4 space-y-6 pb-4">
+        <!-- Quick Topics -->
+        <div>
+          <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Quick Topics</h3>
+          <div id="quick-topics" class="space-y-1">
+            <button type="button" data-prompt="history" class="topic-btn w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="book-open" class="w-4 h-4 text-violet-500 shrink-0"></i>
+              <span class="truncate">Class 12 History</span>
+            </button>
+            <button type="button" data-prompt="economics" class="topic-btn w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+              <span class="truncate">Class 12 Economics</span>
+            </button>
+            <button type="button" data-prompt="aryan" class="topic-btn w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="feather" class="w-4 h-4 text-amber-500 shrink-0"></i>
+              <span class="truncate">Aryan Novel Project</span>
+            </button>
+            <button type="button" data-prompt="(45 * 2) + 18" class="topic-btn w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="calculator" class="w-4 h-4 text-sky-500 shrink-0"></i>
+              <span class="truncate">Math Calculator</span>
+            </button>
+            <button type="button" data-prompt="javascript" class="topic-btn w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="code-2" class="w-4 h-4 text-pink-500 shrink-0"></i>
+              <span class="truncate">Coding &amp; Tech</span>
+            </button>
+            <button type="button" data-prompt="joke" class="topic-btn w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="smile" class="w-4 h-4 text-orange-400 shrink-0"></i>
+              <span class="truncate">Programming Joke</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div>
+          <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Settings</h3>
+          <div class="space-y-2">
+            <!-- Auto-Voice Toggle -->
+            <div class="px-3 py-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="volume-2" class="w-4 h-4 text-violet-500"></i>
+                <div>
+                  <p class="text-xs font-medium text-slate-800 dark:text-slate-200">Auto-Voice</p>
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400">Read replies aloud</p>
+                </div>
+              </div>
+              <button id="toggle-voice-btn" type="button" role="switch" aria-checked="false" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-300 dark:bg-slate-700 transition-colors">
+                <span id="toggle-voice-knob" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-0"></span>
+              </button>
+            </div>
+
+            <!-- Wikipedia Fallback Toggle -->
+            <div class="px-3 py-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <i data-lucide="globe" class="w-4 h-4 text-sky-500"></i>
+                <div>
+                  <p class="text-xs font-medium text-slate-800 dark:text-slate-200">Wikipedia Lookup</p>
+                  <p class="text-[10px] text-slate-500 dark:text-slate-400">Live fallback search</p>
+                </div>
+              </div>
+              <button id="toggle-wiki-btn" type="button" role="switch" aria-checked="true" class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-violet-600 transition-colors">
+                <span id="toggle-wiki-knob" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-4"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utilities -->
+        <div>
+          <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2 mb-2">Actions</h3>
+          <div class="space-y-1">
+            <button id="save-chat-btn" type="button" class="w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="download" class="w-4 h-4 text-slate-400"></i>
+              <span>Export Chat (.txt)</span>
+            </button>
+            <button id="feedback-btn" type="button" class="w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+              <span>Feedback &amp; Support</span>
+            </button>
+            <button id="clear-chat-btn" type="button" class="w-full px-3 py-2 rounded-lg text-left text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center gap-2.5 transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>Clear Conversation</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session ID Footer -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-[#0b111d]">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Privacy ID</p>
+            <p id="display-id" class="text-xs font-mono font-medium text-slate-700 dark:text-slate-300 truncate">V-User-0000</p>
+          </div>
+          <button id="copy-id-btn" type="button" title="Copy Privacy ID" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex flex-col min-w-0 h-full relative">
+      <!-- Top Bar -->
+      <header class="h-16 px-4 sm:px-6 bg-white/80 dark:bg-[#0f1624]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-3 shrink-0 z-20">
+        <div class="flex items-center gap-3 min-w-0">
+          <button id="open-sidebar-btn" type="button" aria-label="Open menu" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="relative flex h-2.5 w-2.5 shrink-0">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <h1 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white truncate">Veda AI Workspace</h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              KB + Math + Wiki
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button id="header-voice-btn" type="button" title="Toggle Auto-Voice" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <i id="header-voice-icon" data-lucide="volume-x" class="w-4 h-4"></i>
+          </button>
+          <button id="theme-toggle-btn" type="button" title="Toggle Light/Dark Theme" class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Feed -->
+      <main id="chat-scroll" class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 scroll-smooth">
+        <div class="max-w-3xl mx-auto flex flex-col gap-5">
+          <!-- Starter Banner (shown when conversation has only welcome message) -->
+          <section id="welcome-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <button type="button" data-prompt="history" class="starter-card group p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11192b] hover:border-violet-400 dark:hover:border-violet-500/60 text-left transition-all shadow-xs">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-violet-600 dark:text-violet-400">Study Helper</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-violet-500 transition-colors"></i>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Ask about Class 12 History or Economics</p>
+            </button>
+            <button type="button" data-prompt="(125 + 75) / 4" class="starter-card group p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11192b] hover:border-sky-400 dark:hover:border-sky-500/60 text-left transition-all shadow-xs">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-sky-600 dark:text-sky-400">Instant Math</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-sky-500 transition-colors"></i>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Solve <span class="font-mono">(125 + 75) / 4</span> safely</p>
+            </button>
+            <button type="button" data-prompt="aryan" class="starter-card group p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11192b] hover:border-amber-400 dark:hover:border-amber-500/60 text-left transition-all shadow-xs">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">Creative Writing</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-500 transition-colors"></i>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Discuss Aryan &amp; the Chakra-tech novel</p>
+            </button>
+            <button type="button" data-prompt="What is Taj Mahal?" class="starter-card group p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11192b] hover:border-emerald-400 dark:hover:border-emerald-500/60 text-left transition-all shadow-xs">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Live Wikipedia</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-500 transition-colors"></i>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Look up "What is Taj Mahal?"</p>
+            </button>
+          </section>
+
+          <!-- Messages Container -->
+          <div id="chat-messages" class="flex flex-col gap-4"></div>
+
+          <!-- Typing Indicator -->
+          <div id="typing-indicator" class="hidden items-start gap-3 msg-animate">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 3l2.2 6.2L20.5 12l-6.3 2.8L12 21l-2.2-6.2L3.5 12l6.3-2.8L12 3z"/>
+              </svg>
+            </div>
+            <div class="px-4 py-3 rounded-2xl rounded-tl-sm bg-white dark:bg-[#131c2e] border border-slate-200 dark:border-slate-800 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-violet-500 typing-dot"></span>
+              <span class="w-2 h-2 rounded-full bg-violet-500 typing-dot"></span>
+              <span class="w-2 h-2 rounded-full bg-violet-500 typing-dot"></span>
+              <span class="ml-1.5 text-xs text-slate-400">Veda is thinking...</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Composer Bar -->
+      <footer class="px-4 sm:px-6 pb-4 pt-2 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent dark:from-[#090d16] dark:via-[#090d16] shrink-0">
+        <div class="max-w-3xl mx-auto">
+          <form id="chat-form" class="flex items-center gap-2 p-2 rounded-2xl bg-white dark:bg-[#131c2e] border border-slate-200 dark:border-slate-800 shadow-lg shadow-slate-900/5 dark:shadow-black/30 focus-within:border-violet-500 dark:focus-within:border-violet-500/80 transition-colors">
+            <button id="mic-btn" type="button" title="Voice Input (Hindi / English)" class="p-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-violet-600 dark:hover:text-violet-400 transition-colors shrink-0">
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+            <input
+              id="user-input"
+              type="text"
+              autocomplete="off"
+              placeholder="Message Veda AI... (try 'history', '45*2', or any topic)"
+              class="flex-1 bg-transparent border-0 text-sm sm:text-[15px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none py-2 px-1"
+            />
+            <button id="send-btn" type="submit" title="Send message" class="p-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors shrink-0 shadow-sm shadow-violet-600/30">
+              <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+            </button>
+          </form>
+          <p class="mt-2 text-center text-[11px] text-slate-400 dark:text-slate-500">
+            Veda Engine v2.0 · Word-boundary Hinglish KB, Safe Math Parser &amp; Live Wikipedia
+          </p>
+        </div>
+      </footer>
     </div>
-</div>
+  </div>
 
-<script src="responses.js"></script>
+  <!-- Feedback & Support Modal -->
+  <div id="feedback-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-[#131c2e] border border-slate-200 dark:border-slate-800 shadow-2xl p-6 msg-animate">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 class="font-semibold text-sm text-slate-900 dark:text-white">Feedback &amp; Support</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Report a question or suggest a feature</p>
+          </div>
+        </div>
+        <button id="close-feedback-btn" type="button" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
 
-<script>
-    const chatContainer = document.getElementById('chat');
-    const inputField = document.getElementById('user-input');
+      <div class="space-y-3">
+        <div>
+          <label for="feedback-text" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1.5">Your message</label>
+          <textarea id="feedback-text" rows="3" placeholder="Write your feedback or question here..." class="w-full rounded-xl bg-slate-50 dark:bg-[#0b111d] border border-slate-200 dark:border-slate-700 p-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-violet-500 resize-none"></textarea>
+        </div>
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <button id="copy-admin-email-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            Copy Admin Email
+          </button>
+          <a id="open-mailto-link" href="mailto:harendrashrivastav44@gmail.com" class="px-4 py-2 rounded-xl text-xs font-medium bg-violet-600 hover:bg-violet-500 text-white transition-colors inline-flex items-center gap-1.5">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span>Open Email App</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-24 right-4 sm:right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // 1. FIXED VEDA KNOWLEDGE BASE (Merged & Deduplicated from responses.js)
+    // =========================================================================
+    const ADMIN_EMAIL = "harendrashrivastav44@gmail.com";
+
+    const vedaDatabase = {
+      // Basic Greetings (deduplicated "hello")
+      "hi": "Hello! Main Veda AI hoon. Aaj hum kis baare mein baat karein?",
+      "hello": "Namaste! Kaise hain aap? Bas apna sawal likhiye, main hazir hoon.",
+      "namaste": "Namaste! Main aapki kya madad kar sakta hoon?",
+
+      // Creative Writing / Novel (Aryan Project)
+      "aryan": "Aryan aapke novel ka protagonist hai na? Uska 'Chakra-tech' system kaafi kamaal hai!",
+      "novel": "World-building mein historical aesthetics aur modern tech ka mel kaafi unique lagta hai.",
+      "fantasy": "15th-century India mein magic aur science ka combination... behtareen idea hai!",
+      "story": "Aapki story 'Aryan' ke baare mein baat karni hai? Uska magic system kamaal hai!",
+      "book": "Novel likhna ek lambi journey hai. Character building par dhyan dein.",
+
+      // Coding & Tech
+      "html": "HTML web ka skeleton hai. Kya aapko ismein kuch naya seekhna hai?",
+      "css": "CSS se hi toh hum bot ko sundar banate hain, jaise humne is modern UI ko banaya!",
+      "javascript": "JS hi bot ka dimaag hai. Ise seekhna aapke liye bahut faydemand hoga.",
+      "bot": "Ji, main ek AI bot hoon. Mujhe 'thoughts_sounds' ne ek advanced interface diya hai.",
+      "net": "Internet ki duniya badi hai, lekin main yahan offline logic se bhi kaam karta hoon!",
+      "app": "Ye ek web-app hai jo GitHub par hosted hai. Kaafi smooth chalti hai na?",
+
+      // Study & Career (Class 12)
+      "history": "Class 12 History mein 'Bricks, Beads and Bones' se lekar 'Mahatma Gandhi' tak bahut kuch interesting hai.",
+      "economics": "Economics mein Macro aur Micro ke concepts samajhna scoring hota hai. Koi topic poonchna hai?",
+      "exam": "Exams ke liye revision aur sample papers sabse zaroori hain. All the best!",
+      "paper": "Exams ki taiyari kar rahe ho? History aur Economics ke important topics poonchh sakte ho.",
+      "result": "Mehnat ka phal hamesha milta hai! Bas focus banaye rakhein.",
+      "notes": "Main aapko concepts samjha sakta hoon, jisse aap apne notes behtar bana sakein.",
+      "padhai": "Padhai mein man nahi lag raha? Thoda break lo aur phir 'Economics' se shuru karo!",
+
+      // Math Keywords (formerly detached outside vedaDatabase!)
+      "hisab": "Haan, main math aur hisab-kitab mein expert hoon! Bataiye kya calculate karna hai?",
+      "calc": "Calculator mode ON! Aap apna sawal (jaise 45*2) likh kar bhejiye.",
+      "jod": "Jodna (Addition) bahut simple hai. Bas numbers ke beech '+' lagaiye.",
+      "ghata": "Ghatao (Subtraction) ke liye '-' ka use karein. Main foran solve kar dunga.",
+      "guna": "Guna (Multiplication) ke liye '*' ka use hota hai. Jaise: 10 * 5.",
+      "bhag": "Bhag (Division) ka matlab hai barabar baantna. Symbol: '/'",
+
+      // User Help & Fun
+      "help": "Main aapka Veda AI assistant hoon. Main Math solve kar sakta hoon, subjects samjha sakta hoon, aur Wikipedia par topics dhoondh sakta hoon.",
+      "kya": "Main bahut kuch kar sakta hoon! Math, Coding, Class 12 Study, ya aapke novel 'Aryan' par baat karein?",
+      "joke": "Ek programmer ki bad-dua: 'Tera code hamesha compile ho, par kabhi chale nahi!'",
+      "funny": "Duniya mein do hi mushkil kaam hain: Ek coding aur doosra coding mein error dhoondhna!"
+    };
+
+    const DEFAULT_FALLBACK = "Hmm, ye mere offline database mein nahi hai aur Wikipedia par bhi exact summary nahi mili. Kya aap thoda aur detail mein poochhna chahenge?";
+
+    // =========================================================================
+    // 2. SAFE MATH EXPRESSION PARSER (Replaces unsafe eval())
+    // =========================================================================
+    function isMathExpression(input) {
+      const cleaned = input.trim();
+      return /^[0-9+\-*/%^().\s]+$/.test(cleaned) && /[0-9]/.test(cleaned);
+    }
+
+    function evaluateMathSafely(expr) {
+      const tokens = [];
+      let i = 0;
+      const str = expr.replace(/\s+/g, '');
+
+      while (i < str.length) {
+        const ch = str[i];
+        if (/[0-9.]/.test(ch)) {
+          let numStr = '';
+          let dotCount = 0;
+          while (i < str.length && /[0-9.]/.test(str[i])) {
+            if (str[i] === '.') dotCount++;
+            if (dotCount > 1) throw new Error('Invalid number');
+            numStr += str[i++];
+          }
+          const val = Number(numStr);
+          if (!Number.isFinite(val)) throw new Error('Invalid number');
+          tokens.push({ type: 'num', value: val });
+        } else if ('+-*/%^()'.includes(ch)) {
+          tokens.push({ type: 'op', value: ch });
+          i++;
+        } else {
+          throw new Error('Unexpected character');
+        }
+      }
+
+      let pos = 0;
+      const peek = () => tokens[pos];
+      const consume = () => tokens[pos++];
+
+      function parseExpression() {
+        let left = parseTerm();
+        while (peek() && (peek().value === '+' || peek().value === '-')) {
+          const op = consume().value;
+          const right = parseTerm();
+          left = op === '+' ? left + right : left - right;
+        }
+        return left;
+      }
+
+      function parseTerm() {
+        let left = parsePower();
+        while (peek() && (peek().value === '*' || peek().value === '/' || peek().value === '%')) {
+          const op = consume().value;
+          const right = parsePower();
+          if ((op === '/' || op === '%') && right === 0) {
+            throw new Error('Division by zero');
+          }
+          if (op === '*') left *= right;
+          else if (op === '/') left /= right;
+          else left %= right;
+        }
+        return left;
+      }
+
+      function parsePower() {
+        let left = parseUnary();
+        if (peek() && peek().value === '^') {
+          consume();
+          const right = parsePower();
+          left = Math.pow(left, right);
+        }
+        return left;
+      }
+
+      function parseUnary() {
+        if (peek() && peek().value === '+') {
+          consume();
+          return parseUnary();
+        }
+        if (peek() && peek().value === '-') {
+          consume();
+          return -parseUnary();
+        }
+        return parsePrimary();
+      }
+
+      function parsePrimary() {
+        const tok = peek();
+        if (!tok) throw new Error('Unexpected end of expression');
+        if (tok.type === 'num') {
+          consume();
+          return tok.value;
+        }
+        if (tok.value === '(') {
+          consume();
+          const val = parseExpression();
+          if (!peek() || peek().value !== ')') throw new Error('Missing closing parenthesis');
+          consume();
+          return val;
+        }
+        throw new Error('Invalid syntax');
+      }
+
+      const result = parseExpression();
+      if (pos !== tokens.length) throw new Error('Unexpected trailing input');
+      if (!Number.isFinite(result)) throw new Error('Result out of range');
+      return Number.isInteger(result) ? result : Number(result.toFixed(6));
+    }
+
+    // =========================================================================
+    // 3. WORD-BOUNDARY KEYWORD MATCHING (Fixes "hi" matching "history"/"hisab")
+    // =========================================================================
+    function matchKnowledgeBase(text) {
+      const normalized = text.toLowerCase().trim();
+      // Sort keys longest-first so more specific keywords win over short ones
+      const sortedKeys = Object.keys(vedaDatabase).sort((a, b) => b.length - a.length);
+      for (const key of sortedKeys) {
+        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i');
+        if (regex.test(normalized)) {
+          return { key, reply: vedaDatabase[key] };
+        }
+      }
+      return null;
+    }
+
+    // =========================================================================
+    // 4. LIVE WIKIPEDIA API FALLBACK (Hindi + English, clean query extraction)
+    // =========================================================================
+    function cleanWikiQuery(raw) {
+      return raw
+        .replace(/[?!.,]+$/g, '')
+        .replace(/^(what is|who is|tell me about|explain|define|search|wikipedia|wiki)\s+/i, '')
+        .replace(/\s+(kya hai|kaun hai|ke bare mein batao|ke baare mein batao|kya hota hai)$/i, '')
+        .trim();
+    }
+
+    async function fetchWikiSummary(lang, topic) {
+      const url = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data && data.extract && data.type !== 'disambiguation') {
+          return {
+            title: data.title || topic,
+            extract: data.extract,
+            url: data.content_urls && data.content_urls.desktop ? data.content_urls.desktop.page : null,
+            lang
+          };
+        }
+        return null;
+      } catch (_) {
+        return null;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    async function fetchWikiData(rawQuery) {
+      const topic = cleanWikiQuery(rawQuery);
+      if (!topic || topic.length < 2) return null;
+      // Try English Wikipedia first for Latin script, Hindi first for Devanagari
+      const isDevanagari = /[\u0900-\u097F]/.test(topic);
+      const order = isDevanagari ? ['hi', 'en'] : ['en', 'hi'];
+      for (const lang of order) {
+        const hit = await fetchWikiSummary(lang, topic);
+        if (hit) return hit;
+      }
+      return null;
+    }
+
+    // =========================================================================
+    // 5. APP STATE & PERSISTENCE (Sandbox-safe try/catch localStorage)
+    // =========================================================================
+    const STORAGE_KEYS = {
+      id: 'veda_user_id_v2',
+      messages: 'veda_chat_history_v2',
+      voice: 'veda_auto_voice_v2',
+      wiki: 'veda_wiki_enabled_v2',
+      theme: 'veda_theme_v2'
+    };
+
+    function safeGetStorage(key, fallback) {
+      try {
+        const val = localStorage.getItem(key);
+        return val !== null ? val : fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    function safeSetStorage(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (_) {
+        // Storage unavailable in restricted context
+      }
+    }
+
+    const state = {
+      vedaID: safeGetStorage(STORAGE_KEYS.id, null) || ("V-User-" + Math.floor(1000 + Math.random() * 9000)),
+      autoVoice: safeGetStorage(STORAGE_KEYS.voice, 'false') === 'true',
+      wikiEnabled: safeGetStorage(STORAGE_KEYS.wiki, 'true') !== 'false',
+      theme: safeGetStorage(STORAGE_KEYS.theme, 'dark'),
+      isThinking: false,
+      isListening: false,
+      messages: []
+    };
+    safeSetStorage(STORAGE_KEYS.id, state.vedaID);
+
+    // =========================================================================
+    // 6. DOM REFERENCES
+    // =========================================================================
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    const openSidebarBtn = document.getElementById('open-sidebar-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const displayIdEl = document.getElementById('display-id');
+    const copyIdBtn = document.getElementById('copy-id-btn');
+    const chatScroll = document.getElementById('chat-scroll');
+    const chatMessages = document.getElementById('chat-messages');
+    const welcomeCards = document.getElementById('welcome-cards');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
     const micBtn = document.getElementById('mic-btn');
-    const sidebarMenu = document.getElementById('sidebar');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+    const saveChatBtn = document.getElementById('save-chat-btn');
+    const feedbackBtn = document.getElementById('feedback-btn');
+    const feedbackModal = document.getElementById('feedback-modal');
+    const closeFeedbackBtn = document.getElementById('close-feedback-btn');
+    const feedbackText = document.getElementById('feedback-text');
+    const copyAdminEmailBtn = document.getElementById('copy-admin-email-btn');
+    const openMailtoLink = document.getElementById('open-mailto-link');
+    const toggleVoiceBtn = document.getElementById('toggle-voice-btn');
+    const toggleVoiceKnob = document.getElementById('toggle-voice-knob');
+    const headerVoiceBtn = document.getElementById('header-voice-btn');
+    const toggleWikiBtn = document.getElementById('toggle-wiki-btn');
+    const toggleWikiKnob = document.getElementById('toggle-wiki-knob');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const toastContainer = document.getElementById('toast-container');
 
-    // 1. UNIQUE PRIVACY ID
-    const vedaID = "V-User-" + Math.floor(1000 + Math.random() * 9000);
-    document.getElementById('display-id').innerText = vedaID;
-
-    function toggleMenu() { sidebarMenu.classList.toggle('active'); }
-
-    // 2. UNIVERSAL GET-REPLY (responses.js aur Calculation handles)
-    function getReply(text) {
-        text = text.toLowerCase().trim();
-
-        // --- WIKIPEDIA API FUNCTION ---
-async function fetchWikiData(query) {
-    // Wikipedia Hindi API URL
-    const url = `https://hi.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-    
-    try {
-        const response = await fetch(url);
-        if (!response.ok) return null; // Agar page nahi mila
-        const data = await response.json();
-        return data.extract; // Wikipedia ki summary return karega
-    } catch (error) {
-        console.error("API Error:", error);
-        return null;
+    // =========================================================================
+    // 7. UTILITIES (Toast, Clipboard, TTS, Time)
+    // =========================================================================
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      const colors = {
+        info: 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900',
+        success: 'bg-emerald-600 text-white',
+        error: 'bg-rose-600 text-white'
+      };
+      toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl text-xs font-medium shadow-lg msg-animate ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 2400);
     }
-}
- 
-        {
-  "mcpServers": {
-    "dataandapis": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote", "https://dataandapis.com/mcp", "--header", "X-Api-Key:${DATAANDAPIS_KEY}"],
-      "env": { "DATAANDAPIS_KEY": "your-api-key" }
+
+    function copyText(text, successMsg = 'Copied to clipboard') {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => showToast(successMsg, 'success'))
+          .catch(() => fallbackCopy(text, successMsg));
+      } else {
+        fallbackCopy(text, successMsg);
+      }
     }
-  }
-}
-        // MATH HANDLER
-        const mathChars = /^[0-9+\-*/().\s]+$/;
-        if (mathChars.test(text) && /[0-9]/.test(text)) {
-            try { return `Natija: ${eval(text)} 🔢`; } catch(e) { return "Calculation error. 😅"; }
+
+    function fallbackCopy(text, successMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg, 'success');
+      } catch (_) {
+        showToast('Could not copy automatically', 'error');
+      }
+      ta.remove();
+    }
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) {
+        showToast('Text-to-speech is not supported in this browser', 'error');
+        return;
+      }
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'hi-IN';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      } catch (_) {
+        // Ignore TTS errors in headless or restricted environments
+      }
+    }
+
+    function formatTime(isoStr) {
+      const d = isoStr ? new Date(isoStr) : new Date();
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    // =========================================================================
+    // 8. UI STATE SYNC (Theme, Voice, Wiki, Sidebar)
+    // =========================================================================
+    function applyTheme() {
+      const isDark = state.theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      themeToggleBtn.innerHTML = isDark
+        ? '<i data-lucide="sun" class="w-4 h-4"></i>'
+        : '<i data-lucide="moon" class="w-4 h-4"></i>';
+      refreshIcons();
+    }
+
+    function syncToggleUI() {
+      // Voice switch
+      toggleVoiceBtn.setAttribute('aria-checked', String(state.autoVoice));
+      toggleVoiceBtn.classList.toggle('bg-violet-600', state.autoVoice);
+      toggleVoiceBtn.classList.toggle('bg-slate-300', !state.autoVoice);
+      toggleVoiceBtn.classList.toggle('dark:bg-slate-700', !state.autoVoice);
+      toggleVoiceKnob.classList.toggle('translate-x-4', state.autoVoice);
+      toggleVoiceKnob.classList.toggle('translate-x-0', !state.autoVoice);
+
+      headerVoiceBtn.innerHTML = state.autoVoice
+        ? '<i data-lucide="volume-2" class="w-4 h-4 text-violet-500"></i>'
+        : '<i data-lucide="volume-x" class="w-4 h-4"></i>';
+      headerVoiceBtn.title = state.autoVoice ? 'Auto-Voice ON (click to mute)' : 'Auto-Voice OFF (click to enable)';
+
+      // Wiki switch
+      toggleWikiBtn.setAttribute('aria-checked', String(state.wikiEnabled));
+      toggleWikiBtn.classList.toggle('bg-violet-600', state.wikiEnabled);
+      toggleWikiBtn.classList.toggle('bg-slate-300', !state.wikiEnabled);
+      toggleWikiBtn.classList.toggle('dark:bg-slate-700', !state.wikiEnabled);
+      toggleWikiKnob.classList.toggle('translate-x-4', state.wikiEnabled);
+      toggleWikiKnob.classList.toggle('translate-x-0', !state.wikiEnabled);
+
+      refreshIcons();
+    }
+
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarBackdrop.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarBackdrop.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 9. MESSAGE RENDERING & CHAT LOGIC
+    // =========================================================================
+    function createMessageElement(msg) {
+      const wrapper = document.createElement('div');
+      const isUser = msg.role === 'user';
+      wrapper.className = `flex items-start gap-3 msg-animate ${isUser ? 'justify-end' : 'justify-start'}`;
+
+      if (!isUser) {
+        const avatar = document.createElement('div');
+        avatar.className = 'w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-sm mt-0.5';
+        avatar.innerHTML = `<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l2.2 6.2L20.5 12l-6.3 2.8L12 21l-2.2-6.2L3.5 12l6.3-2.8L12 3z"/></svg>`;
+        wrapper.appendChild(avatar);
+      }
+
+      const contentCol = document.createElement('div');
+      contentCol.className = `flex flex-col max-w-[85%] sm:max-w-[78%] ${isUser ? 'items-end' : 'items-start'}`;
+
+      const bubble = document.createElement('div');
+      if (isUser) {
+        bubble.className = 'px-4 py-3 rounded-2xl rounded-tr-sm bg-gradient-to-br from-violet-600 to-indigo-600 text-white text-sm sm:text-[15px] leading-relaxed shadow-md shadow-violet-600/15 break-words whitespace-pre-wrap';
+      } else {
+        bubble.className = 'px-4 py-3 rounded-2xl rounded-tl-sm bg-white dark:bg-[#131c2e] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-sm sm:text-[15px] leading-relaxed shadow-xs break-words whitespace-pre-wrap';
+      }
+      bubble.textContent = msg.text;
+      contentCol.appendChild(bubble);
+
+      // Optional Wikipedia link card inside bot column
+      if (!isUser && msg.wikiUrl) {
+        const wikiLink = document.createElement('a');
+        wikiLink.href = msg.wikiUrl;
+        wikiLink.target = '_blank';
+        wikiLink.rel = 'noopener noreferrer';
+        wikiLink.className = 'mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline';
+        wikiLink.innerHTML = `<i data-lucide="external-link" class="w-3.5 h-3.5"></i><span>Read full article on Wikipedia</span>`;
+        contentCol.appendChild(wikiLink);
+      }
+
+      // Meta & Actions row
+      const metaRow = document.createElement('div');
+      metaRow.className = 'mt-1.5 flex items-center flex-wrap gap-2 px-1 text-[11px] text-slate-400 dark:text-slate-500';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.textContent = formatTime(msg.time);
+      metaRow.appendChild(timeSpan);
+
+      if (!isUser && msg.source) {
+        const badge = document.createElement('span');
+        const badgeColors = {
+          'Math Engine': 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
+          'Knowledge Base': 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300',
+          'Wikipedia': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+          'Fallback': 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+        };
+        badge.className = `px-1.5 py-0.5 rounded-md font-medium text-[10px] ${badgeColors[msg.source] || 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'}`;
+        badge.textContent = msg.source;
+        metaRow.appendChild(badge);
+      }
+
+      if (!isUser) {
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'hover:text-slate-700 dark:hover:text-slate-200 inline-flex items-center gap-1 transition-colors cursor-pointer';
+        copyBtn.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span>';
+        copyBtn.addEventListener('click', () => copyText(msg.text, 'Reply copied'));
+        metaRow.appendChild(copyBtn);
+
+        const speakBtn = document.createElement('button');
+        speakBtn.type = 'button';
+        speakBtn.className = 'hover:text-slate-700 dark:hover:text-slate-200 inline-flex items-center gap-1 transition-colors cursor-pointer';
+        speakBtn.innerHTML = '<i data-lucide="volume-2" class="w-3 h-3"></i><span>Listen</span>';
+        speakBtn.addEventListener('click', () => speakText(msg.text));
+        metaRow.appendChild(speakBtn);
+
+        if (msg.reportQuery) {
+          const reportBtn = document.createElement('button');
+          reportBtn.type = 'button';
+          reportBtn.className = 'text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 transition-colors cursor-pointer';
+          reportBtn.innerHTML = '<i data-lucide="flag" class="w-3 h-3"></i><span>Report to Admin</span>';
+          reportBtn.addEventListener('click', () => openFeedbackModal(`Unknown Question Report\nVeda-ID: ${state.vedaID}\nQuestion: ${msg.reportQuery}`));
+          metaRow.appendChild(reportBtn);
         }
+      }
 
-        // DATABASE HANDLER (Keyword matching)
-        if (typeof vedaDatabase !== 'undefined') {
-            for (let key in vedaDatabase) {
-                if (text.includes(key.toLowerCase())) return vedaDatabase[key];
-            }
+      contentCol.appendChild(metaRow);
+      wrapper.appendChild(contentCol);
+      return wrapper;
+    }
+
+    function renderMessages() {
+      chatMessages.innerHTML = '';
+      state.messages.forEach(msg => {
+        chatMessages.appendChild(createMessageElement(msg));
+      });
+      const hasUserMessages = state.messages.some(m => m.role === 'user');
+      welcomeCards.classList.toggle('hidden', hasUserMessages);
+      refreshIcons();
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+    }
+
+    function saveHistory() {
+      safeSetStorage(STORAGE_KEYS.messages, JSON.stringify(state.messages));
+    }
+
+    function addMessage(role, text, meta = {}) {
+      const msg = {
+        id: Date.now() + Math.random().toString(36).slice(2, 6),
+        role,
+        text,
+        time: new Date().toISOString(),
+        source: meta.source || null,
+        wikiUrl: meta.wikiUrl || null,
+        reportQuery: meta.reportQuery || null
+      };
+      state.messages.push(msg);
+      saveHistory();
+
+      chatMessages.appendChild(createMessageElement(msg));
+      if (role === 'user') {
+        welcomeCards.classList.add('hidden');
+      }
+      refreshIcons();
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+
+      if (role === 'bot' && state.autoVoice && !meta.silent) {
+        speakText(text);
+      }
+    }
+
+    async function getReply(rawText) {
+      const text = rawText.trim();
+
+      // 1. Safe Math Handler
+      if (isMathExpression(text)) {
+        try {
+          const value = evaluateMathSafely(text);
+          return { text: `Natija: ${value}`, source: 'Math Engine' };
+        } catch (err) {
+          const reason = err.message === 'Division by zero' ? 'Zero se divide nahi kar sakte.' : 'Calculation syntax check karein (example: 45 * 2).';
+          return { text: `Calculation error: ${reason}`, source: 'Math Engine' };
         }
+      }
 
-        // UNKNOWN QUESTION HANDLER (Admin Reporting)
-        setTimeout(() => {
-            const admin = "harendrashrivastav44@gmail.com";
-            const body = `Veda-ID: ${vedaID}%0AQuestion: ${text}`;
-            window.location.href = `mailto:${admin}?subject=Unknown Question Report&body=${body}`;
-        }, 2500);
+      // 2. Word-Boundary Knowledge Base Handler
+      const kbMatch = matchKnowledgeBase(text);
+      if (kbMatch) {
+        return { text: kbMatch.reply, source: 'Knowledge Base' };
+      }
 
-        return (typeof defaultResponse !== 'undefined') ? defaultResponse : "Maaf kijiye, mujhe iska jawab nahi mila. Maine ye report admin ko bhej di hai.";
-    }
-
-    // 3. UI MESSAGE & AUTO-VOICE
-    function addMsg(text, type) {
-        const d = document.createElement("div");
-        d.className = `msg ${type}`;
-        d.innerText = text;
-        chatContainer.appendChild(d);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-
-        // AUTO-VOICE (Bot automatically speaks)
-        if (type === "bot") {
-            const speech = new SpeechSynthesisUtterance(text);
-            speech.lang = 'hi-IN';
-            window.speechSynthesis.speak(speech);
+      // 3. Live Wikipedia Fallback (when enabled)
+      if (state.wikiEnabled) {
+        const wiki = await fetchWikiData(text);
+        if (wiki) {
+          return {
+            text: `${wiki.title}: ${wiki.extract}`,
+            source: 'Wikipedia',
+            wikiUrl: wiki.url
+          };
         }
+      }
+
+      // 4. Clean Fallback (no automatic mailto redirect!)
+      return {
+        text: DEFAULT_FALLBACK,
+        source: 'Fallback',
+        reportQuery: text
+      };
     }
 
-    function processMessage() {
-        const val = inputField.value.trim();
-        if(!val) return;
-        addMsg(val, "user");
-        inputField.value = "";
-        setTimeout(() => addMsg(getReply(val), "bot"), 600);
-    }
+    async function handleSend(prefillText = null) {
+      const val = (prefillText !== null ? prefillText : userInput.value).trim();
+      if (!val || state.isThinking) return;
 
-    // 4. MENU ACTIONS (Save & Feedback)
-    function saveChatData() {
-        let log = `VEDA AI CHAT LOG\nID: ${vedaID}\n----------------\n`;
-        document.querySelectorAll('.msg').forEach(m => {
-            log += (m.classList.contains('user') ? "USER: " : "BOT: ") + m.innerText + "\n";
+      closeSidebar();
+      addMessage('user', val);
+      if (prefillText === null) userInput.value = '';
+
+      state.isThinking = true;
+      sendBtn.disabled = true;
+      typingIndicator.classList.remove('hidden');
+      typingIndicator.classList.add('flex');
+      chatScroll.scrollTop = chatScroll.scrollHeight;
+
+      try {
+        // Short natural delay so UI feels responsive and smooth
+        const [reply] = await Promise.all([
+          getReply(val),
+          new Promise(resolve => setTimeout(resolve, 320))
+        ]);
+        typingIndicator.classList.add('hidden');
+        typingIndicator.classList.remove('flex');
+        addMessage('bot', reply.text, {
+          source: reply.source,
+          wikiUrl: reply.wikiUrl,
+          reportQuery: reply.reportQuery
         });
-        const blob = new Blob([log], {type: "text/plain"});
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `Veda_Data_${vedaID}.txt`;
-        a.click();
+      } finally {
+        state.isThinking = false;
+        sendBtn.disabled = false;
+        userInput.focus();
+      }
     }
 
-    function sendFeedback() {
-        window.location.href = `mailto:harendrashrivastav44@gmail.com?subject=Feedback from ${vedaID}`;
+    function resetConversation(showNotice = true) {
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (_) {}
+      }
+      state.messages = [{
+        id: 'welcome-' + Date.now(),
+        role: 'bot',
+        text: "Namaste! Main Veda AI hoon. Aaj main aapki kya madad kar sakta hoon?",
+        time: new Date().toISOString(),
+        source: 'Knowledge Base'
+      }];
+      saveHistory();
+      renderMessages();
+      closeSidebar();
+      if (showNotice) showToast('Started a fresh conversation', 'info');
     }
 
-    // 5. MIC & VOICE INPUT
+    function exportChatTxt() {
+      let log = `VEDA AI CHAT LOG\nPrivacy ID: ${state.vedaID}\nExported: ${new Date().toLocaleString()}\n====================================\n\n`;
+      state.messages.forEach(m => {
+        const who = m.role === 'user' ? 'USER' : 'VEDA AI';
+        const tag = m.source ? ` [${m.source}]` : '';
+        log += `[${formatTime(m.time)}] ${who}${tag}:\n${m.text}\n\n`;
+      });
+      const blob = new Blob([log], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Veda_Chat_${state.vedaID}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Chat transcript downloaded', 'success');
+    }
+
+    // =========================================================================
+    // 10. FEEDBACK MODAL
+    // =========================================================================
+    function updateMailtoHref() {
+      const body = feedbackText.value.trim() || `Feedback from ${state.vedaID}`;
+      openMailtoLink.href = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent('Veda AI Feedback - ' + state.vedaID)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function openFeedbackModal(prefill = '') {
+      feedbackText.value = prefill;
+      updateMailtoHref();
+      feedbackModal.classList.remove('hidden');
+      feedbackModal.classList.add('flex');
+      closeSidebar();
+      feedbackText.focus();
+    }
+
+    function closeFeedbackModal() {
+      feedbackModal.classList.add('hidden');
+      feedbackModal.classList.remove('flex');
+    }
+
+    // =========================================================================
+    // 11. SPEECH RECOGNITION (MIC INPUT)
+    // =========================================================================
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
     if (SpeechRec) {
-        const rec = new SpeechRec();
-        rec.lang = "hi-IN";
-        micBtn.onclick = () => { rec.start(); micBtn.classList.add('mic-on'); };
-        rec.onend = () => micBtn.classList.remove('mic-on');
-        rec.onresult = (e) => { inputField.value = e.results[0][0].transcript; processMessage(); };
+      recognition = new SpeechRec();
+      recognition.lang = 'hi-IN';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        state.isListening = true;
+        micBtn.classList.add('text-rose-500', 'bg-rose-500/10', 'mic-recording');
+        showToast('Listening... speak now', 'info');
+      };
+
+      recognition.onend = () => {
+        state.isListening = false;
+        micBtn.classList.remove('text-rose-500', 'bg-rose-500/10', 'mic-recording');
+      };
+
+      recognition.onerror = (event) => {
+        state.isListening = false;
+        micBtn.classList.remove('text-rose-500', 'bg-rose-500/10', 'mic-recording');
+        const msg = event.error === 'not-allowed'
+          ? 'Microphone permission was denied'
+          : 'Could not capture voice input';
+        showToast(msg, 'error');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0] && event.results[0][0] ? event.results[0][0].transcript : '';
+        if (transcript.trim()) {
+          userInput.value = transcript;
+          handleSend();
+        }
+      };
     }
 
-    // 6. EVENT LISTENERS
-    sendBtn.onclick = processMessage;
-    inputField.onkeypress = (e) => { if(e.key === "Enter") processMessage(); };
+    // =========================================================================
+    // 12. EVENT LISTENERS & INITIALIZATION
+    // =========================================================================
+    openSidebarBtn.addEventListener('click', openSidebar);
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    sidebarBackdrop.addEventListener('click', closeSidebar);
 
-    window.onload = () => addMsg("Namaste! Main Veda AI hoon. Mai apki kya help hoon. 🔮", "bot");
-</script>
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleSend();
+    });
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) {
+        showToast('Voice input requires Chrome or Edge', 'error');
+        return;
+      }
+      if (state.isListening) {
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch (_) {
+          showToast('Voice recognition is already active', 'info');
+        }
+      }
+    });
+
+    document.querySelectorAll('.topic-btn, .starter-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prompt = btn.getAttribute('data-prompt');
+        if (prompt) handleSend(prompt);
+      });
+    });
+
+    function toggleVoice() {
+      state.autoVoice = !state.autoVoice;
+      safeSetStorage(STORAGE_KEYS.voice, String(state.autoVoice));
+      if (!state.autoVoice && 'speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (_) {}
+      }
+      syncToggleUI();
+      showToast(state.autoVoice ? 'Auto-Voice enabled' : 'Auto-Voice muted', 'info');
+    }
+
+    toggleVoiceBtn.addEventListener('click', toggleVoice);
+    headerVoiceBtn.addEventListener('click', toggleVoice);
+
+    toggleWikiBtn.addEventListener('click', () => {
+      state.wikiEnabled = !state.wikiEnabled;
+      safeSetStorage(STORAGE_KEYS.wiki, String(state.wikiEnabled));
+      syncToggleUI();
+      showToast(state.wikiEnabled ? 'Wikipedia lookup enabled' : 'Offline KB mode only', 'info');
+    });
+
+    themeToggleBtn.addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      safeSetStorage(STORAGE_KEYS.theme, state.theme);
+      applyTheme();
+    });
+
+    newChatBtn.addEventListener('click', () => resetConversation(true));
+    clearChatBtn.addEventListener('click', () => resetConversation(true));
+    saveChatBtn.addEventListener('click', exportChatTxt);
+    copyIdBtn.addEventListener('click', () => copyText(state.vedaID, 'Privacy ID copied'));
+
+    feedbackBtn.addEventListener('click', () => openFeedbackModal(''));
+    closeFeedbackBtn.addEventListener('click', closeFeedbackModal);
+    feedbackModal.addEventListener('click', (e) => {
+      if (e.target === feedbackModal) closeFeedbackModal();
+    });
+    feedbackText.addEventListener('input', updateMailtoHref);
+    copyAdminEmailBtn.addEventListener('click', () => copyText(ADMIN_EMAIL, 'Admin email copied'));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeFeedbackModal();
+        closeSidebar();
+      }
+    });
+
+    // Boot App
+    function init() {
+      displayIdEl.textContent = state.vedaID;
+      applyTheme();
+      syncToggleUI();
+
+      try {
+        const saved = safeGetStorage(STORAGE_KEYS.messages, null);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            state.messages = parsed;
+            renderMessages();
+            return;
+          }
+        }
+      } catch (_) {
+        // Corrupted saved history; reset cleanly
+      }
+
+      resetConversation(false);
+    }
+
+    init();
+  </script>
 </body>
-</html>
+    </html>
